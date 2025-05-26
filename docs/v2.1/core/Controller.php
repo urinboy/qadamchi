@@ -1,4 +1,7 @@
 <?php
+/**
+ * Barcha controllerlar uchun asos
+ */
 abstract class Controller {
     protected function view($name, $params = []) {
         extract($params);

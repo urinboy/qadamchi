@@ -1,4 +1,7 @@
 <?php
+/**
+ * Marshrutlar va dispatch uchun Route klassi
+ */
 class Route {
     protected static $routes = [];
     public static function get($uri, $action) {
@@ -7,25 +10,17 @@ class Route {
     public static function post($uri, $action) {
         self::$routes['POST'][$uri] = $action;
     }
-    public static function any($uri, $action) {
-        self::$routes['ANY'][$uri] = $action;
-    }
     public static function dispatch() {
         $method = $_SERVER['REQUEST_METHOD'];
         $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-        // Fallback: if not found, try ANY
-        $action = self::$routes[$method][$uri] ?? self::$routes['ANY'][$uri] ?? null;
+        $action = self::$routes[$method][$uri] ?? null;
         if ($action) {
             if (is_callable($action)) {
                 return call_user_func($action);
             } elseif (is_string($action) && strpos($action, '@')) {
                 list($controller, $method) = explode('@', $action);
                 $controller = "App\\Controllers\\$controller";
-                if (class_exists($controller)) {
-                    (new $controller)->{$method}();
-                } else {
-                    echo "Controller topilmadi: $controller";
-                }
+                (new $controller)->{$method}();
             }
         } else {
             http_response_code(404);
