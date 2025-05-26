@@ -1,0 +1,513 @@
+#!/usr/bin/env php
+<?php
+/**
+ * Qadamchi CLI 2.1
+ * Powerful command line tool for Qadamchi framework
+ * Author: UrinboyDev
+ * Version: 2.1
+ */
+
+$argv = $_SERVER['argv'];
+$argc = $_SERVER['argc'];
+
+function printHelp() {
+    echo <<<EOT
+Qadamchi CLI 2.1
+
+Usage:
+  php qadamchi <command> [options]
+
+Main Commands:
+  make:controller   Controller yaratish
+  make:model        Model yaratish
+  make:migration    Migration fayli yaratish
+  make:middleware   Middleware yaratish
+  make:seeder       Seeder yaratish
+  make:command      CLI buyruq (command) yaratish
+  make:view         View (php) fayli yaratish
+
+Migration & Seed:
+  migrate           Barcha migrationlarni ishga tushurish
+  migrate:rollback  Oxirgi migration(lar)ni orqaga olish
+  migrate:reset     Barcha migrationlarni orqaga qaytarish
+  migrate:fresh     Bazani tozalab, migrationlarni qayta ishga tushurish
+  db:seed           Barcha seederlarni ishga tushurish
+  db:seed --class   Berilgan seeder klassini ishga tushurish
+
+Service:
+  route:list        Marshrutlar ro‘yxatini ko‘rsatish
+  cache:clear       Cache papkasini tozalash
+  log:clear         Log papkasini tozalash
+  session:clear     Session papkasini tozalash
+  key:generate      Yangi ilova kalitini yaratish
+  serve             Local server ishga tushurish (http://localhost:8080)
+
+General:
+  --help, -h        Yordamni ko‘rsatish
+  list              Barcha buyruqlar va tavsifi
+
+EOT;
+}
+
+// Helper functions
+function studly($string) {
+    return str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $string)));
+}
+function snake($string) {
+    return strtolower(preg_replace('/(.)(?=[A-Z])/u', '$1_', $string));
+}
+function camel($string) {
+    return lcfirst(studly($string));
+}
+
+function getMigrationTable() {
+    $env = __DIR__ . '/.env';
+    if (!file_exists($env)) return 'migrations';
+    $lines = file($env, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        if (stripos($line, 'MIGRATION_TABLE=') === 0) {
+            return trim(explode('=', $line, 2)[1]);
+        }
+    }
+    return 'migrations';
+}
+
+// Main
+if ($argc < 2 || in_array($argv[1], ['-h', '--help', 'help'])) {
+    printHelp();
+    exit;
+}
+
+$command = $argv[1];
+$name = $argv[2] ?? null;
+
+// ========== MAKE SECTION ==========
+switch ($command) {
+    case 'make:controller':
+        if (!$name) {
+            echo "Controller nomini kiriting!\n";
+            exit(1);
+        }
+        $class = studly($name);
+        $path = "app/Controllers/{$class}.php";
+        if (file_exists($path)) {
+            echo "Controller mavjud: $path\n";
+            exit(1);
+        }
+        $content = <<<EOT
+<?php
+namespace App\Controllers;
+
+use Controller;
+
+class {$class} extends Controller {
+    public function index() {
+        //
+    }
+}
+EOT;
+        file_put_contents($path, $content);
+        echo "Controller yaratildi: $path\n";
+        break;
+
+    case 'make:model':
+        if (!$name) {
+            echo "Model nomini kiriting!\n";
+            exit(1);
+        }
+        $class = studly($name);
+        $path = "app/Models/{$class}.php";
+        if (file_exists($path)) {
+            echo "Model mavjud: $path\n";
+            exit(1);
+        }
+        $content = <<<EOT
+<?php
+namespace App\Models;
+
+use Model;
+
+class {$class} extends Model {
+    //
+}
+EOT;
+        file_put_contents($path, $content);
+        echo "Model yaratildi: $path\n";
+        break;
+
+    case 'make:migration':
+        if (!$name) {
+            echo "Migration nomini kiriting!\n";
+            exit(1);
+        }
+        $timestamp = date('Y_m_d_His');
+        $class = studly($name);
+        $filename = "{$timestamp}_{$name}.php";
+        $path = "app/Migrations/{$filename}";
+        $content = <<<EOT
+<?php
+use Migration;
+
+class {$class} extends Migration {
+    public function up() {
+        //
+    }
+    public function down() {
+        //
+    }
+}
+EOT;
+        file_put_contents($path, $content);
+        echo "Migration yaratildi: $path\n";
+        break;
+
+    case 'make:middleware':
+        if (!$name) {
+            echo "Middleware nomini kiriting!\n";
+            exit(1);
+        }
+        $class = studly($name);
+        $path = "app/Middlewares/{$class}.php";
+        $content = <<<EOT
+<?php
+namespace App\Middlewares;
+
+use Middleware;
+
+class {$class} extends Middleware {
+    public function handle(\$request, \$next) {
+        //
+        return \$next(\$request);
+    }
+}
+EOT;
+        file_put_contents($path, $content);
+        echo "Middleware yaratildi: $path\n";
+        break;
+
+    case 'make:seeder':
+        if (!$name) {
+            echo "Seeder nomini kiriting!\n";
+            exit(1);
+        }
+        $class = studly($name);
+        $path = "app/Seeders/{$class}.php";
+        $content = <<<EOT
+<?php
+use Seeder;
+
+class {$class} extends Seeder {
+    public function run() {
+        //
+    }
+}
+EOT;
+        file_put_contents($path, $content);
+        echo "Seeder yaratildi: $path\n";
+        break;
+
+    case 'make:command':
+        if (!$name) {
+            echo "Command nomini kiriting!\n";
+            exit(1);
+        }
+        $class = studly($name);
+        $path = "app/Commands/{$class}.php";
+        if (!is_dir('app/Commands')) mkdir('app/Commands', 0777, true);
+        $content = <<<EOT
+<?php
+
+class {$class} {
+    public function handle() {
+        // Command logic here
+    }
+}
+EOT;
+        file_put_contents($path, $content);
+        echo "Command yaratildi: $path\n";
+        break;
+
+    case 'make:view':
+        if (!$name) {
+            echo "View nomini kiriting!\n";
+            exit(1);
+        }
+        $filename = str_replace(['.', '\\', '/'], '_', $name);
+        $path = "app/Views/{$filename}.php";
+        if (file_exists($path)) {
+            echo "View mavjud: $path\n";
+            exit(1);
+        }
+        $content = <<<EOT
+<!-- {$filename} view -->
+<h1>{$filename}</h1>
+EOT;
+        file_put_contents($path, $content);
+        echo "View yaratildi: $path\n";
+        break;
+
+// ========== MIGRATION & SEED SECTION ==========
+
+    case 'migrate':
+        migrateAll();
+        break;
+
+    case 'migrate:rollback':
+        migrateRollback();
+        break;
+
+    case 'migrate:reset':
+        migrateReset();
+        break;
+
+    case 'migrate:fresh':
+        migrateFresh();
+        break;
+
+    case 'db:seed':
+        $class = null;
+        foreach($argv as $a) {
+            if (strpos($a, '--class=') === 0) {
+                $class = trim(substr($a, 8));
+            }
+        }
+        dbSeed($class);
+        break;
+
+// ========== SERVICE SECTION ==========
+
+    case 'route:list':
+        routeList();
+        break;
+
+    case 'cache:clear':
+        clearDir('storage/cache');
+        echo "Cache cleared!\n";
+        break;
+
+    case 'log:clear':
+        clearDir('storage/logs');
+        echo "Logs cleared!\n";
+        break;
+
+    case 'session:clear':
+        clearDir('storage/sessions');
+        echo "Sessions cleared!\n";
+        break;
+
+    case 'key:generate':
+        $key = bin2hex(random_bytes(16));
+        $env = file_exists('.env') ? file_get_contents('.env') : '';
+        if (strpos($env, "APP_KEY=") !== false) {
+            $env = preg_replace("/APP_KEY=.*/", "APP_KEY=$key", $env);
+        } else {
+            $env .= "\nAPP_KEY=$key";
+        }
+        file_put_contents('.env', $env);
+        echo "Application key generated: $key\n";
+        break;
+
+    case 'serve':
+        $host = 'localhost';
+        $port = '8080';
+        echo "Qadamchi server ishga tushdi: http://$host:$port\n";
+        echo "To'xtatish uchun Ctrl+C bosing\n";
+        passthru("php -S $host:$port -t public public/index.php");
+        break;
+
+// ========== GENERAL SECTION ==========
+
+    case 'list':
+        printHelp();
+        break;
+
+    default:
+        echo "Noto‘g‘ri buyruq: $command\n";
+        printHelp();
+        exit(1);
+}
+
+// ====== Utility & Handler Functions ======
+
+function clearDir($dir) {
+    if (!is_dir($dir)) return;
+    $files = scandir($dir);
+    foreach ($files as $file) {
+        if ($file === '.' || $file === '..') continue;
+        $path = "$dir/$file";
+        if (is_dir($path)) {
+            clearDir($path);
+            @rmdir($path);
+        } else {
+            @unlink($path);
+        }
+    }
+}
+
+// --- Migration Handler Functions (Simple File-based) ---
+function getPDO() {
+    $db = require 'config/db.php';
+    try {
+        $dsn = "mysql:host={$db['host']};dbname={$db['name']};charset=utf8";
+        return new PDO($dsn, $db['user'], $db['pass']);
+    } catch (Exception $e) {
+        echo "DB ulanishda xatolik: {$e->getMessage()}\n";
+        exit(1);
+    }
+}
+function ensureMigrationTable($pdo) {
+    $table = getMigrationTable();
+    $pdo->exec("CREATE TABLE IF NOT EXISTS `$table` (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        migration VARCHAR(255) NOT NULL,
+        batch INT NOT NULL,
+        migrated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )");
+}
+function getMigrations() {
+    $migrations = [];
+    $files = glob('app/Migrations/*.php');
+    foreach ($files as $file) {
+        $base = basename($file, '.php');
+        $migrations[$base] = $file;
+    }
+    return $migrations;
+}
+function getRanMigrations($pdo) {
+    $table = getMigrationTable();
+    $stmt = $pdo->query("SELECT migration FROM `$table`");
+    return $stmt ? $stmt->fetchAll(PDO::FETCH_COLUMN) : [];
+}
+function migrateAll() {
+    $pdo = getPDO();
+    ensureMigrationTable($pdo);
+    $migrations = getMigrations();
+    $ran = getRanMigrations($pdo);
+    $batch = (int)$pdo->query("SELECT MAX(batch) FROM `" . getMigrationTable() . "`")->fetchColumn() + 1;
+    $count = 0;
+    foreach ($migrations as $name => $file) {
+        if (in_array($name, $ran)) continue;
+        require_once $file;
+        $class = studly(preg_replace('/^(\d+_)+/', '', $name));
+        if (!class_exists($class)) {
+            echo "Class not found: $class\n"; continue;
+        }
+        $obj = new $class();
+        $obj->up();
+        $pdo->prepare("INSERT INTO `" . getMigrationTable() . "` (migration, batch) VALUES (?, ?)")->execute([$name, $batch]);
+        echo "Migrated: $name\n";
+        $count++;
+    }
+    if ($count == 0) echo "No new migrations.\n";
+}
+function migrateRollback() {
+    $pdo = getPDO();
+    ensureMigrationTable($pdo);
+    $table = getMigrationTable();
+    $batch = (int)$pdo->query("SELECT MAX(batch) FROM `$table`")->fetchColumn();
+    if ($batch < 1) { echo "No migration to rollback.\n"; return; }
+    $stmt = $pdo->prepare("SELECT migration FROM `$table` WHERE batch = ? ORDER BY id DESC");
+    $stmt->execute([$batch]);
+    $toRollback = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    if (!$toRollback) { echo "No migration to rollback.\n"; return; }
+    foreach ($toRollback as $name) {
+        $file = "app/Migrations/{$name}.php";
+        if (!file_exists($file)) continue;
+        require_once $file;
+        $class = studly(preg_replace('/^(\d+_)+/', '', $name));
+        if (class_exists($class)) {
+            $obj = new $class();
+            $obj->down();
+            $pdo->prepare("DELETE FROM `$table` WHERE migration = ?")->execute([$name]);
+            echo "Rolled back: $name\n";
+        }
+    }
+}
+function migrateReset() {
+    $pdo = getPDO();
+    ensureMigrationTable($pdo);
+    $table = getMigrationTable();
+    $stmt = $pdo->query("SELECT migration FROM `$table` ORDER BY id DESC");
+    $all = $stmt ? $stmt->fetchAll(PDO::FETCH_COLUMN) : [];
+    foreach ($all as $name) {
+        $file = "app/Migrations/{$name}.php";
+        if (!file_exists($file)) continue;
+        require_once $file;
+        $class = studly(preg_replace('/^(\d+_)+/', '', $name));
+        if (class_exists($class)) {
+            $obj = new $class();
+            $obj->down();
+            $pdo->prepare("DELETE FROM `$table` WHERE migration = ?")->execute([$name]);
+            echo "Rolled back: $name\n";
+        }
+    }
+}
+function migrateFresh() {
+    $pdo = getPDO();
+    $table = getMigrationTable();
+    $pdo->exec("DROP TABLE IF EXISTS `$table`");
+    echo "Migration table dropped.\n";
+    migrateAll();
+}
+
+function dbSeed($class = null) {
+    $seeders = glob('app/Seeders/*.php');
+    require_once 'core/Seeder.php';
+    $ran = 0;
+    if ($class) {
+        $fname = "app/Seeders/{$class}.php";
+        if (!file_exists($fname)) {
+            echo "Seeder not found: $fname\n";
+            return;
+        }
+        require_once $fname;
+        if (!class_exists($class)) {
+            echo "Seeder class not found: $class\n";
+            return;
+        }
+        $s = new $class();
+        $s->run();
+        echo "Seeded: $class\n";
+        return;
+    }
+    foreach ($seeders as $file) {
+        require_once $file;
+        $c = basename($file, '.php');
+        if (class_exists($c)) {
+            $s = new $c();
+            $s->run();
+            echo "Seeded: $c\n";
+            $ran++;
+        }
+    }
+    if ($ran == 0) echo "No seeders found.\n";
+}
+
+// Route list (simple parser)
+function routeList() {
+    $routes = [];
+    $files = glob('routes/*.php');
+    foreach ($files as $file) {
+        $lines = file($file);
+        foreach ($lines as $line) {
+            if (preg_match('/Route::([a-z]+)\s*\(\s*[\'"](.+?)[\'"]\s*,\s*([^\)]+)\)/i', $line, $m)) {
+                $routes[] = [
+                    'method' => strtoupper($m[1]),
+                    'uri' => $m[2],
+                    'action' => trim($m[3]),
+                    'file' => basename($file)
+                ];
+            }
+        }
+    }
+    if (!$routes) {
+        echo "No routes found.\n"; return;
+    }
+    echo str_pad("METHOD", 8) . str_pad("URI", 30) . str_pad("ACTION", 30) . "FILE\n";
+    echo str_repeat("-", 75) . "\n";
+    foreach ($routes as $r) {
+        echo str_pad($r['method'], 8) . str_pad($r['uri'], 30) . str_pad($r['action'], 30) . $r['file'] . "\n";
+    }
+}
+
+?>
