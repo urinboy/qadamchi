@@ -96,7 +96,7 @@
 </head>
 <body>
     <div class="container">
-        <img src="/logo.png" class="logo" alt="Qadamchi Logo" />
+        <img src="/favicon.svg" class="logo" alt="Qadamchi Logo" />
         <h1>Qadamchiga xush kelibsiz!</h1>
         <div class="subtitle">O‘zbekistonlik dasturchilar uchun zamonaviy <br>PHP mikro freymvorki.<br>
         <span style="color:#228be6;">Ochiq manba. Tez. Oddiy.</span>
