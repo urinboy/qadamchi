@@ -1,26 +1,15 @@
 #!/usr/bin/env php
 <?php
-// Qadamchi CLI 2.1 (eng muhim buyruqlar short variant, to'liq versiyasi oldingi javobda)
+$argv = $_SERVER['argv'];
+$argc = $_SERVER['argc'];
 if ($argc < 2) {
-    echo "Qadamchi CLI – php qadamchi <command> [options]\n";
+    echo "Qadamchi CLI v2.2 – php qadamchi <command> [options]\n";
     exit;
 }
-$command = $argv[1];
-switch ($command) {
-    case 'serve':
-        echo "Server: http://localhost:8080\n";
-        passthru('php -S localhost:8080 -t public public/index.php');
-        break;
-    case 'make:controller':
-        $name = $argv[2] ?? null;
-        if (!$name) { echo "Controller nomini kiriting!\n"; exit(1);}
-        $class = $name;
-        $path = "app/Controllers/{$class}.php";
-        if (file_exists($path)) { echo "Controller mavjud: $path\n"; exit(1);}
-        file_put_contents($path, "<?php\nnamespace App\\Controllers;\nclass {$class} extends \\Controller { public function index(){} }");
-        echo "Controller yaratildi: $path\n";
-        break;
-    // Qo'shimcha buyruqlarni to'liq versiyadan qo'shish mumkin
-    default:
-        echo "Noto‘g‘ri buyruq: $command\n";
+$command = str_replace(':', '_', $argv[1]);
+$cliFile = __DIR__ . '/app/Cli/' . $command . '.php';
+if (!file_exists($cliFile)) {
+    echo "Noto‘g‘ri buyruq: {$argv[1]}\n";
+    exit(1);
 }
+require $cliFile;

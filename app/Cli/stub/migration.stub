@@ -1,0 +1,15 @@
+<?php
+use Migration;
+
+class {{class}} extends Migration {
+    public function up() {
+        $this->schema->create('table_name', function($table) {
+            $table->bigIncrements('id');
+            $table->timestamps();
+        });
+    }
+    public function down() {
+        $this->schema->drop('table_name');
+    }
+}
+

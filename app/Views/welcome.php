@@ -150,7 +150,7 @@
         </div>
     </header>
     <div class="hero">
-        <div class="hero-big">Qadamchi.uz</div>
+        <div class="hero-big">Qadamchi</div>
     </div>
     <footer>
         &copy; <?= date('Y') ?> <a href="https://urinboydev.uz" target="_blank" style="color:#3b5bdb;text-decoration:none;">UrinboyDev</a> tomonidan yaratilgan <br>Qadamchi PHP Mikrofreymvork

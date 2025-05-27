@@ -1,0 +1,7 @@
+<?php
+
+class {{class}} {
+    public function handle() {
+        // Command logic here
+    }
+}
