@@ -20,6 +20,9 @@ spl_autoload_register(function ($class) {
     }
 });
 
+require_once __DIR__ . '/../core/dotenv.php';
+load_env();
+
 // Yordamchi funksiyalar (masalan, route())
 $helpers = __DIR__ . '/../core/helpers.php';
 if (file_exists($helpers)) require_once $helpers;
