@@ -1,11 +1,20 @@
 <?php
 namespace App\Middlewares;
 
-use Middleware;
-
-class {{class}} extends Middleware {
-    public function handle(\$request, \$next) {
-        //
-        return \$next(\$request);
+class {{class}} {
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Closure  $next
+     * @return mixed
+     */
+    public function handle($request, $next) {
+        // Middleware logic before request
+        
+        $response = $next($request);
+        
+        // Middleware logic after request
+        
+        return $response;
     }
 }

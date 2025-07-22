@@ -1,10 +1,20 @@
 <?php
 $name = $argv[2] ?? null;
-if (!$name) { echo "Migration nomini kiriting!\n"; exit(1);}
+if (!$name) { 
+    echo "Migration nomini kiriting!\n"; 
+    exit(1);
+}
+
 $timestamp = date('Y_m_d_His');
 $class = str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $name)));
 $filename = "{$timestamp}_{$name}.php";
 $path = "app/Migrations/{$filename}";
+
+// app/Migrations papkasini yaratish (agar yo'q bo'lsa)
+if (!is_dir('app/Migrations')) {
+    mkdir('app/Migrations', 0777, true);
+}
+
 $stub = file_get_contents(__DIR__.'/stub/migration.stub');
 
 // Avtomatik table nomini aniqlash (agar nom create_x_table bo'lsa)
