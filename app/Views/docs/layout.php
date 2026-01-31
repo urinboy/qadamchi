@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $title ?? 'Qadamchi'; ?></title>
+    <title><?php echo $title ?? 'Qadamchi Docs'; ?></title>
     <link rel="stylesheet" href="/assets/style.css">
     <link href="https://fonts.googleapis.com/css?family=Inter:400,600,800&display=swap" rel="stylesheet">
     <style>
@@ -49,16 +49,34 @@
         }
         main {
             flex: 1;
-            max-width: 1200px;
+            max-width: 1000px;
             margin: 20px auto;
             padding: 20px;
             background-color: white;
             border-radius: 16px;
             box-shadow: 0 8px 32px rgba(50,50,93,0.10), 0 1.5px 10px rgba(60,60,60,0.08);
         }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
+        .content {
+            line-height: 1.6;
+        }
+        .content h1, .content h2, .content h3 {
+            color: var(--primary);
+            margin-top: 30px;
+        }
+        .content code {
+            background: #f0f3ff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .content pre {
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        .content ul {
+            padding-left: 20px;
         }
         footer {
             text-align: center;
@@ -66,46 +84,25 @@
             color: var(--muted);
             margin-top: 20px;
         }
-        h1 {
-            color: var(--primary);
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 2.5rem;
-        }
-        .btn {
-            display: inline-block;
-            background-color: var(--primary);
-            color: white;
-            padding: 12px 24px;
-            text-decoration: none;
-            border-radius: 8px;
-            transition: background-color 0.3s;
-            font-weight: 600;
-        }
-        .btn:hover {
-            background-color: #2c4bc7;
-        }
     </style>
 </head>
 <body>
     <header>
         <nav>
             <a href="<?php echo \Route::url('home'); ?>">Bosh sahifa</a>
-            <a href="<?php echo \Route::url('about'); ?>">Biz haqimizda</a>
-            <a href="<?php echo \Route::url('team'); ?>">Jamoa</a>
-            <a href="<?php echo \Route::url('contact'); ?>">Aloqa</a>
-            <a href="<?php echo \Route::url('blog'); ?>">Blog</a>
+            <a href="<?php echo \Route::url('docs'); ?>">Docs</a>
+            <a href="https://github.com/urinboy/qadamchi">GitHub</a>
         </nav>
     </header>
 
     <main>
-        <div class="container">
+        <div class="content">
             <?php echo $content ?? ''; ?>
         </div>
     </main>
 
     <footer>
-        <p>&copy; 2026 <a href="https://urinboydev.uz" style="color: var(--primary);">Qadamchi Framework</a></p>
+        <p>&copy; 2026 <a href="https://urinboydev.uz" style="color: var(--primary);">Qadamchi Framework</a> Dokumentatsiyasi</p>
     </footer>
 </body>
 </html>

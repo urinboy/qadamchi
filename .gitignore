@@ -1,0 +1,23 @@
+# Environment variables
+.env
+
+# Logs and sessions
+storage/logs/*
+storage/sessions/*
+
+# Cache
+storage/cache/*
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# Composer
+vendor/
+
+# Tests coverage
+coverage/
