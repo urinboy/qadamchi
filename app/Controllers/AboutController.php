@@ -13,11 +13,11 @@ class AboutController extends \Controller {
 
     public function team() {
         $data = ['title' => 'Bizning Jamoa'];
-        return $this->view('about.team', $data);
+        return $this->view('about/team', $data);
     }
 
     public function contact() {
         $data = ['title' => 'Aloqa'];
-        return $this->view('about.contact', $data);
+        return $this->view('about/contact', $data);
     }
 }
