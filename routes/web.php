@@ -11,15 +11,14 @@ Route::get('/biz-haqimizda/{slug}', 'AboutController@index')->name('about.slug')
 Route::get('/jamoa', 'AboutController@team')->name('team');
 Route::get('/aloqa', 'AboutController@contact')->name('contact');
 
-// Blog (kelajak uchun)
-Route::get('/blog', function() {
-    return view('blog.index');
-})->name('blog');
+// Blog
+Route::get('/blog', 'BlogController@index')->name('blog');
+Route::get('/blog/{id}', 'BlogController@show')->name('blog.show');
 
 // API route-lar (web.php da, lekin API uchun)
 Route::group(['prefix' => 'api'], function() {
     Route::get('/about', function() {
-        return Response::json(['message' => 'Biz haqimizda API']);
+        return \Response::json(['message' => 'Biz haqimizda API']);
     });
 });
 
