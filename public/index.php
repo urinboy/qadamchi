@@ -36,6 +36,7 @@ if (file_exists($helpers)) require_once $helpers;
 // Load routes
 require __DIR__ . '/../core/Route.php';
 require __DIR__ . '/../routes/web.php';
+require __DIR__ . '/../routes/docs.php';
 
 // Dispatch routes
 Route::dispatch();
