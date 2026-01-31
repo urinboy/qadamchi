@@ -6,17 +6,23 @@ if (php_sapi_name() === 'cli-server' && is_file($publicPath)) {
     return false; // Static faylni PHP server o'zi beradi
 }
 
-// Simple autoloader
+// Simple PSR-4 like autoloader
 spl_autoload_register(function ($class) {
-    $class = str_replace('\\', '/', $class);
-    if (file_exists(__DIR__ . '/../core/' . basename($class) . '.php')) {
-        require __DIR__ . '/../core/' . basename($class) . '.php';
-    } elseif (file_exists(__DIR__ . '/../app/Controllers/' . basename($class) . '.php')) {
-        require __DIR__ . '/../app/Controllers/' . basename($class) . '.php';
-    } elseif (file_exists(__DIR__ . '/../app/Models/' . basename($class) . '.php')) {
-        require __DIR__ . '/../app/Models/' . basename($class) . '.php';
-    } elseif (file_exists(__DIR__ . '/../app/Middlewares/' . basename($class) . '.php')) {
-        require __DIR__ . '/../app/Middlewares/' . basename($class) . '.php';
+    $prefix = 'App\\';
+    $base_dir = __DIR__ . '/../app/';
+    $len = strlen($prefix);
+    if (strncmp($prefix, $class, $len) !== 0) {
+        // Core klasslari uchun
+        $coreFile = __DIR__ . '/../core/' . str_replace('\\', '/', $class) . '.php';
+        if (file_exists($coreFile)) {
+            require $coreFile;
+        }
+        return;
+    }
+    $relative_class = substr($class, $len);
+    $file = $base_dir . str_replace('\\', '/', $relative_class) . '.php';
+    if (file_exists($file)) {
+        require $file;
     }
 });
 

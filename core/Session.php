@@ -8,4 +8,8 @@ class Session {
         if (session_status() === PHP_SESSION_NONE) session_start();
         return $_SESSION[$key] ?? $default;
     }
+    public static function regenerate() {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        session_regenerate_id(true);
+    }
 }
