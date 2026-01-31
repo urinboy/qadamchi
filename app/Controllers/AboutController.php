@@ -12,10 +12,12 @@ class AboutController extends \Controller {
     }
 
     public function team() {
-        return $this->view('about.team');
+        $data = ['title' => 'Bizning Jamoa'];
+        return $this->view('about.team', $data);
     }
 
     public function contact() {
-        return $this->view('about.contact');
+        $data = ['title' => 'Aloqa'];
+        return $this->view('about.contact', $data);
     }
 }
