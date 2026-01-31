@@ -21,19 +21,35 @@ Route::get('/user/{id}', function($id) {
 Route::get('/admin', 'AdminController@index')->middleware('auth');
 ```
 
+## Controller bilan Route-lar
+```php
+Route::get('/about', 'AboutController@index');
+Route::get('/about/{slug}', 'AboutController@index');
+```
+
 ## Guruh Route-lar
 ```php
-Route::group(['prefix' => 'api', 'middleware' => 'api'], function() {
+Route::group(['prefix' => 'api'], function() {
     Route::get('/users', 'ApiController@users');
+});
+
+Route::group(['middleware' => 'auth'], function() {
+    Route::get('/dashboard', 'DashboardController@index');
 });
 ```
 
-## Named Route-lar
+## Misol: To'liq web.php
 ```php
-Route::get('/profile', 'UserController@profile')->name('profile');
-```
+<?php
+Route::get('/', 'WelcomeController@index')->name('home');
+Route::get('/about', 'AboutController@index')->name('about');
+Route::get('/about/{slug}', 'AboutController@index')->name('about.slug');
+Route::get('/team', 'AboutController@team')->name('team');
+Route::get('/contact', 'AboutController@contact')->name('contact');
 
-URL olish:
-```php
-$url = Route::url('profile');
+Route::group(['prefix' => 'api'], function() {
+    Route::get('/about', function() {
+        return Response::json(['message' => 'About API']);
+    });
+});
 ```
