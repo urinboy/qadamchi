@@ -3,6 +3,37 @@
 Ushbu loyihadagi barcha muhim o'zgarishlar shu faylda qayd etiladi.
 Format — [Keep a Changelog](https://keepachangelog.com/) asosida, versiyalash esa [SemVer](https://semver.org/) qoidalariga amal qiladi.
 
+## [3.1.0] - 2026-07-16
+
+### O'zgartirildi
+
+- Direktoriya strukturalari Laravel'ga moslashtirildi:
+  - `app/Migrations/` → `database/migrations/` (global namespace saqlandi — `glob`+`require` orqali yuklanadi).
+  - `app/Seeders/` → `database/seeders/` (`Database\Seeders` nomlar fazosiga o'tdi, PSR-4 autoload).
+  - `app/Views/` → `resources/views/` (Blade `.blade.php`).
+  - `app/Lang/` → `lang/` (Laravel 11+ root `lang/`).
+- Barcha path-reference'lar yangi helper'larga o'tkazildi: `database_path()`, `resource_path()`, `lang_path()`.
+
+### Qo'shildi
+
+- `resource_path()` va `lang_path()` global helper'lari (`core/Support/helpers.php`).
+- PSR-4 prefix'lar: `Database\Seeders\` → `database/seeders/`, `Database\Factories\` → `database/factories/` (`bootstrap/autoload.php`, `composer.json`).
+- Factory infratuzilmasi (Laravel uslubi): `core/Database/Factory` bazasi, `Model::factory()` metodi (`Database\Factories\<Model>Factory` konventsiyasi, PSR-4 autoload).
+- `database/factories/UserFactory.php` namunasi.
+- `make:factory` CLI buyrug'i + `factory.stub` + `Factory` aliasi.
+- `db:seed` qayta yozildi: qisqa nom → `Database\Seeders\` FQCN resolve (glob-preload olib tashlandi).
+- `build:installer` endi `resources/` va `lang/` papkalarini ham pakkalaydi.
+
+### Tuzilma (Laravel bilan mos)
+
+| Qadamchi 3.1.0 | Laravel |
+|---|---|
+| `database/migrations` | `database/migrations` |
+| `database/seeders` (`Database\Seeders`) | `database/seeders` |
+| `database/factories` (`Database\Factories`) | `database/factories` |
+| `resources/views` | `resources/views` |
+| `lang/` | `lang/` |
+
 ## [3.0.0] - 2026-07-15
 
 ### O'zgartirildi
@@ -28,4 +59,5 @@ Format — [Keep a Changelog](https://keepachangelog.com/) asosida, versiyalash 
 - `.env` fayli versiya nazoratidan chiqarildi (endi `.gitignore`da).
 - Eski flat core/app fayllari, ishlatilmayotgan `Post` modeli va eski migratsiyalar.
 
+[3.1.0]: https://github.com/urinboy/qadamchi/releases/tag/v3.1.0
 [3.0.0]: https://github.com/urinboy/qadamchi/releases/tag/v3.0.0
