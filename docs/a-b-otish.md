@@ -59,10 +59,18 @@ require __DIR__ . '/../vendor/autoload.php';
 PSR-4 map `composer.json`'da autoloader map bilan **bir xil**:
 ```json
 {
-  "autoload": { "psr-4": { "Qadamchi\\": "core/", "App\\": "app/" } }
+  "autoload": {
+    "psr-4": {
+      "Qadamchi\\": "core/",
+      "App\\": "app/",
+      "Database\\Seeders\\": "database/seeders/",
+      "Database\\Factories\\": "database/factories/"
+    }
+  }
 }
 ```
 > Namespace va fayl joylashuvi o'zgartirilmaydi — faqat kim yuklashi.
+> `Database\Seeders\` va `Database\Factories\` 3.1.0'da qo'shilgan (Laravel bilan bir xil joylashuv).
 
 ### 3. Container'ni paketga almashtiring
 ```bash

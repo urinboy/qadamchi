@@ -1,117 +1,129 @@
-# Qadamchi CLI (`qadamchi`) – Qo‘llanma
+# Qadamchi CLI binary — qo'llanma
 
-## Qadamchi CLI nima?
+Ushbu hujjat **`qadamchi` CLI binary** haqida: fayl qayerda joylashadi, qanday ishga
+tushiriladi, ruxsat va shebang, Windows'da ishlatish, va yangi buyruq qo'shish retsepti.
+Buyruqlarning to'liq reference'i — [`qadamchi-commands.md`](qadamchi-commands.md).
 
-Qadamchi CLI — bu Qadamchi framework uchun yaratilgan buyruq satri vositasi.  
-Laravel’dagi `artisan` kabi, u sizga controller, model, migration, seeder va boshqa fayllarni terminal orqali tez va oson generatsiya qilish imkonini beradi.
+`qadamchi` — bu Laravel'ning `artisan`'iga o'xshash buyruq satri vositasi. U loyiha
+ildizidagi `qadamchi` fayli (kengaytmasiz) bo'lib, `app/Cli/*.php` fayllariga dispatch qiladi:
+har buyruq alohida fayl — o'rganish uchun ochiq.
 
 ---
 
-## `qadamchi` CLI faylini qayerga joylash kerak?
+## CLI binary nima?
 
-- `qadamchi` CLI faylini loyihangizning **asosiy (root) papkasiga** joylashtiring. Bu papkada odatda `install.php` ham bo‘ladi.
-- Fayl **qadamchi** deb nomlanishi kerak (hech qanday kengaytmasiz, ya’ni `.php` yoki `.txt` emas).
+`qadamchi` — kengaytmasiz PHP skript, loyiha ildizida turadi. U:
 
-**Papka namunasi:**
+1. `bootstrap/autoload.php`'ni yuklaydi (PSR-4 + aliaslar).
+2. `--version` / `--help` flag'larini dispatch'dan oldin tekshiradi.
+3. Berilgan buyruqni `app/Cli/<command>.php` fayliga yo'naltiradi (`:` → `_`).
+    - Masalan: `make:controller` → `app/Cli/make_controller.php`.
+
+Buyruq topilmasa: `Noto'g'ri buyruq: ...` xatosi.
+
+---
+
+## Fayl qayerga joylanadi?
+
+`qadamchi` CLI faylini loyiha **asosiy (root) papkasiga** joylang — `install.php` bilan birga.
+Fayl **`qadamchi`** deb nomlanishi kerak (kengaytmasiz — `.php`/`.txt` emas).
 
 ```
 /sizning-loyihangiz/
-│
-├── qadamchi       <-- CLI fayl aynan shu yerda bo‘lishi kerak
+├── qadamchi       <-- CLI fayl aynan shu yerda
 ├── install.php
-├── core/
-├── app/
-├── routes/
-├── config/
-├── public/
-├── ...
+├── core/   app/   routes/   config/   public/   ...
 ```
 
 ---
 
-## Qadamchi CLI faylini qanday ishga tushirish mumkin?
+## Joylash va ruxsat
 
-1. **Ruxsat berish (Linux/macOS):**
+### 1. Ruxsat berish (Linux/macOS)
 
-   ```sh
-   chmod +x qadamchi
-   ```
+```sh
+chmod +x qadamchi
+```
 
-2. **(Ixtiyoriy) Fayl boshiga shebang qo‘shish:**
+### 2. (Ixtiyoriy) Shebang qo'shish
 
-   ```
-   #!/usr/bin/env php
-   ```
+Fayl boshida allaqachon shebang bor (generatsiya qilingan):
 
-   > Bu orqali siz `./qadamchi` deb to‘g‘ridan-to‘g‘ri ishlatishingiz mumkin bo‘ladi. Aks holda, har doim `php qadamchi` deb yozasiz.
+```
+#!/usr/bin/env php
+```
 
----
-
-## Qadamchi CLI’dan qanday foydalaniladi?
-
-- **Loyihangiz root papkasida** quyidagicha buyruqlarni yozing:
-
-  ```sh
-  php qadamchi make:controller MyController
-  php qadamchi make:model MyModel
-  php qadamchi make:migration create_my_table
-  php qadamchi make:middleware MyMiddleware
-  php qadamchi make:seeder MySeeder
-  ```
-
-- **Yordamni ko‘rish uchun:**
-
-  ```sh
-  php qadamchi --help
-  ```
-
-- **Agar executable ruxsat bersangiz va shebang bo‘lsa:**
-
-  ```sh
-  ./qadamchi make:controller MyController
-  ```
+Bu `./qadamchi` ko'rinishida to'g'ridan-to'g'ri ishlatishga imkon beradi. Aks holda — har
+doim `php qadamchi`.
 
 ---
 
-## Qadamchi CLI nimalar qiladi?
+## `php qadamchi` vs `./qadamchi`
 
-- Kerakli papkalarga (`app/Controllers`, `app/Models` va boshqalar) mos PHP fayl yaratadi.
-- Sizga boshlang‘ich (skeleton) kod yozib beradi, shunda siz darhol o‘z logikingizni yozishni boshlashingiz mumkin.
-- Fayl mavjud bo‘lsa, ustidan yozmaydi va ogohlantiradi.
+| Usul | Shart | Misol |
+|---|---|---|
+| `php qadamchi <buyruq>` | PHP `PATH`'da bo'lsa (har doim ishlaydi) | `php qadamchi migrate` |
+| `./qadamchi <buyruq>` | unix + `chmod +x` + shebang | `./qadamchi migrate` |
+
+### Windows eslatma
+
+Windows'da har doim `php qadamchi ...` ishlating (`./qadamchi` ishlamaydi).
+Windows'da ruxsat (`chmod`) kerak emas.
+
+---
+
+## Foydalanish
+
+Loyiha root papkasida:
+
+```sh
+php qadamchi list                 # barcha buyruqlar
+php qadamchi --version            # versiya
+php qadamchi make:controller PostController
+php qadamchi migrate
+php qadamchi serve                # http://localhost:8080
+```
+
+To'liq buyruqlar ro'yxati va sintaksis: [`qadamchi-commands.md`](qadamchi-commands.md).
+
+---
+
+## Yangi buyruq qo'shish
+
+`qadamchi` binary'ni tahrirlash shart emas — dispatch avtomatik. Yangi buyruq uchun
+`app/Cli/` papkasiga fayl qo'shasiz. Masalan, `php qadamchi stats` buyrug'i:
+
+1. `app/Cli/stats.php` faylini yarating:
+
+```php
+<?php
+/**
+ * stats — loyiha statistikasini chiqaradi.
+ * Foydalanish: php qadamchi stats
+ */
+echo "Qadamchi statistikasi\n";
+echo "  Route'lar: " . count(app(\Qadamchi\Routing\Router::class)->routes()) . "\n";
+echo "  Versiya:   " . \Qadamchi\Support\Version::VERSION . "\n";
+```
+
+2. Darhol ishlatish:
+
+```sh
+php qadamchi stats
+```
+
+`qadamchi` binary `:` ni `_` ga aylantiradi: `db:seed` → `app/Cli/db_seed.php`.
+Shu sababli `app/Cli/` ichidagi har bir fayl — bitta buyruq.
+
+> Yordamchi: `php qadamchi make:command Stats` `app/Commands/Stats.php` skeleton yaratadi
+> (bu boshqa joy — `app/Commands/`). CLI dispatch uchun fayl `app/Cli/`'da bo'lishi kerak.
 
 ---
 
 ## Xatoliklar va muammolar
 
-- Buyruqlarni har doim Qadamchi loyihangizning asosiy papkasida yozing.
-- PHP o‘rnatilgan va PATH’da mavjud bo‘lishi kerak.
-- “Permission denied” chiqsa, `chmod +x qadamchi` buyrug‘ini yana bir marta yozing.
-- Windows’da har doim `php qadamchi ...` deb ishlating. (`./qadamchi` emas!)
-
----
-
-## Qadamchi CLI’ni kengaytirish
-
-- Yangi buyruqlar qo‘shmoqchi bo‘lsangiz, `qadamchi` faylini oching va strukturaga mos holda yangi case yozing.
-
----
-
-## Namuna: Controller yaratish
-
-```sh
-php qadamchi make:controller BlogController
-```
-
-- Natijada `app/Controllers/BlogController.php` fayli yaratiladi va boshlang‘ich kod bilan to‘ldiriladi.
-
----
-
-## Qisqacha xulosa
-
-- **`qadamchi` faylini loyihaning asosiy papkasiga joylashtiring.**
-- **Terminalda `php qadamchi ...` orqali buyruqlar yozing.**
-- **`--help` orqali mavjud buyruqlar ro‘yxatini ko‘ring.**
-
-Batafsil ishlash yoki kengaytirish uchun `qadamchi` faylidagi izohlar va kod tuzilmasini o‘rganing.
-
----
+- Buyruqlarni har doim **loyiha ildizida** yozing.
+- PHP o'rnatilgan va `PATH`'da bo'lishi kerak.
+- `Permission denied` → `chmod +x qadamchi` qayta yozing.
+- Windows'da `./qadamchi` ishlamaydi — `php qadamchi ...` ishlating.
+- `Noto'g'ri buyruq: ...` → `app/Cli/<buyruq>.php` fayli yo'q (`:` → `_` e'tibor bering).

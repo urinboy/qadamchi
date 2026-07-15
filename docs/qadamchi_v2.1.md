@@ -1,5 +1,8 @@
 # Qadamchi PHP Framework — So‘nggi Strukturasi (v2.1)
 
+> **Eslatma:** Tarixiy hujjat — v2.1 strukturasi. Joriy strukturani [`tuzilma`](tuzilma)
+> hujjatidan ko'ring, to'liq tarixni esa [`tarix`](tarix) hujjatidan o'qing.
+
 Quyida Qadamchi frameworkining to‘liq, zamonaviy va “Laravelga o‘xshash” asosiy fayl va papkalar strukturasini ko‘rishingiz mumkin.
 
 ---

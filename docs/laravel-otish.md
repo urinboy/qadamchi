@@ -110,6 +110,16 @@ Auth::user()->name;
 
 **Laravel'da qo'shimcha:** scopes, observers, factories, `with()` eager loading, soft deletes, mutators (Laravel 9+ attribute casting).
 
+### Factory (3.1.0'dan)
+
+```php
+// Qadamchi va Laravel — bir xil API
+User::factory()->create();              // 1 ta
+User::factory()->count(10)->create();   // 10 ta
+```
+`database/factories/UserFactory.php` (`Database\Factories` nom fazosi), `definition()` metodi.
+Generator: `php qadamchi make:factory User`. Batafsil: [`tushunchalar.md`](tushunchalar.md#factory-test-seed-uchun-soxta-ma-lumot).
+
 ---
 
 ## 6. Request / Validation

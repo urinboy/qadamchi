@@ -159,6 +159,33 @@ Buyruqlar: `migrate`, `migrate:rollback`, `migrate:reset`, `migrate:fresh`.
 
 ---
 
+## Factory (test/seed uchun soxta ma'lumot)
+
+`database/factories/UserFactory.php`:
+```php
+class UserFactory extends \Qadamchi\Database\Factory {
+    protected string $model = User::class;
+    public function definition(): array {
+        return [
+            'name'     => 'Test User',
+            'email'    => 'user@example.com',
+            'password' => bcrypt('password'),
+        ];
+    }
+}
+```
+```php
+User::factory()->create();                 // 1 ta user
+User::factory()->count(10)->create();      // 10 ta user
+User::factory()->create(['name' => 'Ali']); // override
+```
+Konventsiya: `Database\Factories\<Model>Factory` (`User::factory()` → `UserFactory`).
+Generator: `php qadamchi make:factory User`.
+
+> **Laravel'da bu:** `database/factories/UserFactory.php` + `User::factory()->create()` — **bir xil API**. Qadamchi 3.1.0'da qo'shilgan, Laravel uslubidagi `definition()`/`count()`/`create()`.
+
+---
+
 ## CLI (qadamchi)
 
 `php qadamchi <buyruq>`:

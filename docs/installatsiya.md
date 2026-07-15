@@ -30,9 +30,12 @@ php install.php
 
 Bu:
 
-- 160 ta faylni ajratib chiqaradi
+- butun loyiha fayllarini ajratib chiqaradi (~175 ta — core, app, bootstrap, config, routes,
+  public, docs, tests, database, resources, lang + root fayllar)
 - `.env` faylini yaratadi (`.env.namuna` asosida)
 - `APP_KEY` generatsiya qiladi
+- runtime papkalarni (`storage/*`, `database/`) yaratadi
+- `qadamchi` CLI'ga ijro huquqi beradi (unix)
 - o'zini (install.php) o'chiradi
 
 ### 2. Veb orqali
