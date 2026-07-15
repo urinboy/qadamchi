@@ -12,6 +12,7 @@ return [
     'Blueprint' => 'Qadamchi\Database\Blueprint',
     'Migration' => 'Qadamchi\Database\Migration',
     'Seeder'    => 'Qadamchi\Database\Seeder',
+    'Factory'   => 'Qadamchi\Database\Factory',
     'Request'   => 'Qadamchi\Http\Request',
     'Response'  => 'Qadamchi\Http\Response',
     'Middleware'=> 'Qadamchi\Http\Middleware',

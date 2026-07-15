@@ -181,6 +181,18 @@ abstract class Model
         return (new QueryBuilder())->setModel(new static());
     }
 
+    /**
+     * Factory'ni resolve qilish (Laravel HasFactory konventsiyasi).
+     * `Database\Factories\<Model>Factory` ni PSR-4 orqali yuklaydi.
+     *   User::factory()->create([...])
+     */
+    public static function factory(): \Qadamchi\Database\Factory
+    {
+        $short = (new \ReflectionClass(static::class))->getShortName();
+        $fqn = 'Database\\Factories\\' . $short . 'Factory';
+        return $fqn::new();
+    }
+
     public static function where($column, $operator = '=', $value = null): QueryBuilder
     {
         return static::query()->where($column, $operator, $value);
