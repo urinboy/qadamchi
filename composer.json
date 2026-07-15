@@ -1,0 +1,43 @@
+{
+    "name": "qadamchi/framework",
+    "description": "Qadamchi — O'zbekcha, Laravel'ga o'xshash, Composer'siz ishlaydigan PHP mikrofremvork (A versiyasi). composer.json — B versiyasiga o'tish uchun tayyor stub.",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+        "php": ">=8.0",
+        "ext-pdo": "*",
+        "ext-mbstring": "*",
+        "ext-json": "*"
+    },
+    "suggest": {
+        "league/container": "PSR-11 container — B versiyasida Qadamchi\\Container\\Container o'rniga (imzo mos)",
+        "monolog/monolog": "PSR-3 logger — B versiyasida Qadamchi\\Support\\Logger o'rniga (imzo mos)",
+        "nyholm/psr7": "PSR-7 HTTP message implementation — B versiyasida Request/Response uchun",
+        "psr/http-server-middleware": "PSR-15 middleware — B versiyasida onion pipeline o'rniga"
+    },
+    "autoload": {
+        "psr-4": {
+            "Qadamchi\\": "core/",
+            "App\\": "app/"
+        },
+        "files": [
+            "core/Support/helpers.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "migrate": "@php qadamchi migrate",
+        "seed": "@php qadamchi db:seed",
+        "serve": "@php qadamchi serve",
+        "test": "@php qadamchi test",
+        "installer": "@php qadamchi build:installer"
+    },
+    "config": {
+        "optimize-autoloader": true
+    },
+    "minimum-stability": "stable"
+}
