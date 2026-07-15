@@ -55,6 +55,12 @@ php qadamchi db:seed         # namuna ma'lumot
 php qadamchi serve           # http://localhost:8080
 ```
 
+> **Ma'lumotlar bazasi:** Qadamchi default bo'yicha **SQLite** ishlatadi (Laravel 13
+> uslubida) — `php qadamchi migrate` `database/database.sqlite` faylini avtomatik
+> yaratadi, hech qanday tashqi server kerak emas. Istalgan paytda **MySQL** yoki
+> **PostgreSQL**'ga o'tish uchun `.env` faylida `DB_CONNECTION` va tegishli `DB_*`
+> qiymatlarini o'zgartiring (namunalar `.env` faylida izoh bilan ko'rsatilgan).
+
 ## Apache (.htaccess) — serverga joylash
 
 PHP built-in server (`php qadamchi serve`) routing'ni o'zi hal qiladi, lekin **Apache**'da `mod_rewrite` uchun `.htaccess` kerak. Loyihada ikkita `.htaccess` mavjud:

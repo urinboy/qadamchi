@@ -53,7 +53,7 @@ Controller metodlariga `Request` (va boshqa sinflar) **Container orqali avtomati
 
 ## Blade view
 
-`app/Views/*.blade.php`. Sintaksis Laravel Blade bilan bir xil:
+`resources/views/*.blade.php`. Sintaksis Laravel Blade bilan bir xil:
 - `{{ $x }}` — escape; `{!! $x !!}` — xom.
 - `@if/@elseif/@else/@endif`, `@foreach/@endforeach`, `@forelse/@empty/@endforelse`, `@isset/@endisset`.
 - `@extends('layouts.app')`, `@section('content')...@endsection`, `@yield('content')` — layout inheritance.
@@ -164,7 +164,7 @@ Buyruqlar: `migrate`, `migrate:rollback`, `migrate:reset`, `migrate:fresh`.
 `php qadamchi <buyruq>`:
 - `migrate`, `migrate:fresh`, `migrate:rollback`, `migrate:reset`
 - `db:seed [--class=]`
-- `make:controller/model/migration/seeder/middleware/request/view/command`
+- `make:controller/model/migration/seeder/factory/middleware/request/view/command`
 - `key:generate`, `route:list`, `cache:clear`, `session:clear`, `log:clear`
 - `serve`, `test`, `build:installer`, `list`
 
@@ -201,7 +201,7 @@ env('APP_DEBUG', false);
 
 ## Lang (tarjima)
 
-`app/Lang/uz/messages.php`:
+`lang/uz/messages.php`:
 ```php
 return ['welcome' => 'Xush kelibsiz, :name'];
 ```
@@ -215,7 +215,7 @@ trans('messages.welcome', ['name' => 'Ali']);   // "Xush kelibsiz, Ali"
 
 ## Misol blog ilovasi
 
-Repo'ning o'zi to'liq misol: `routes/web.php` + `app/Controllers/{Welcome,Auth,Post}Controller` + `app/Models/{User,Post}` (hasMany/belongsTo relation) + `app/Views/*` Blade + `app/Migrations/*` + `app/Seeders/*` + Auth (register/login/logout) + CSRF + validation. Shu oqimni o'qib chiqish = butun fremvorkni tushunish.
+Repo'ning o'zi to'liq misol: `routes/web.php` + `app/Controllers/{Welcome,Auth,Post}Controller` + `app/Models/{User,Post}` (hasMany/belongsTo relation) + `resources/views/*` Blade + `database/migrations/*` + `database/seeders/*` + `database/factories/*` + Auth (register/login/logout) + CSRF + validation. Shu oqimni o'qib chiqish = butun fremvorkni tushunish.
 
 ---
 

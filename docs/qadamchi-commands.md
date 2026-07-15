@@ -19,11 +19,12 @@ Quyida Qadamchi framework uchun CLI (`php qadamchi ...`) orqali ishlatiladigan b
 |------------------------------------------------|-----------------------------------------------|
 | `php qadamchi make:controller Nomi`            | Yangi controller yaratadi (`app/Controllers`).|
 | `php qadamchi make:model Nomi`                 | Yangi model yaratadi (`app/Models`).          |
-| `php qadamchi make:migration nomi`             | Yangi migration fayli yaratadi (`app/Migrations`).|
+| `php qadamchi make:migration nomi`             | Yangi migration fayli yaratadi (`database/migrations`).|
 | `php qadamchi make:middleware Nomi`            | Yangi middleware yaratadi (`app/Middlewares`).|
-| `php qadamchi make:seeder Nomi`                | Yangi seeder yaratadi (`app/Seeders`).        |
+| `php qadamchi make:seeder Nomi`                | Yangi seeder yaratadi (`database/seeders`).        |
+| `php qadamchi make:factory Nomi`               | Yangi factory yaratadi (`database/factories`).    |
 | `php qadamchi make:command Nomi`               | Yangi CLI command (buyruq) fayli yaratadi.    |
-| `php qadamchi make:view nomi`                  | Yangi view fayli yaratadi (`app/Views`).      |
+| `php qadamchi make:view nomi`                  | Yangi view fayli yaratadi (`resources/views`).      |
 
 ---
 

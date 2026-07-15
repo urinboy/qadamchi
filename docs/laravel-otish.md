@@ -14,9 +14,11 @@ Maqsad: Qadamchi'da o'rganib, Laravel'ga o'tishda "hammasi tanish" bo'lsin.
 | `app/Middlewares` | `app/Http/Middleware` | bir xil mantiq |
 | `app/Models` | `app/Models` | **bir xil** |
 | `app/Requests` | `app/Http/Requests` | FormRequest |
-| `app/Migrations` | `database/migrations` | |
-| `app/Seeders` | `database/seeders` | |
-| `app/Views` | `resources/views` | Blade `.blade.php` |
+| `app/Migrations` | `database/migrations` | **3.1.0'da ko'chirildi** — endi `database/migrations` |
+| `app/Seeders` | `database/seeders` | **3.1.0'da ko'chirildi** — endi `database/seeders` (`Database\Seeders`) |
+| `database/factories` | `database/factories` | **3.1.0'da qo'shildi** — `Database\Factories` |
+| `app/Views` | `resources/views` | **3.1.0'da ko'chirildi** — endi `resources/views` (Blade `.blade.php`) |
+| `app/Lang` | `lang/` | **3.1.0'da ko'chirildi** — endi `lang/` (Laravel 11+) |
 | `app/Cli` | `app/Console/Commands` | |
 | `routes/web.php` | `routes/web.php` | **bir xil** |
 | `routes/api.php` | `routes/api.php` | **bir xil** |
@@ -25,7 +27,7 @@ Maqsad: Qadamchi'da o'rganib, Laravel'ga o'tishda "hammasi tanish" bo'lsin.
 | `storage/framework/*` | `storage/framework/*` | view/sess/cache |
 | `bootstrap/app.php` | `bootstrap/app.php` | |
 
-> **Laravel'da farq:** `app/` ichida `Http/`, `Console/` qavatlari bor. Qadamchi'da esa tekis (boshlang'ichlar uchun sodda).
+> **Laravel'da farq:** `app/` ichida `Http/`, `Console/` qavatlari bor. Qadamchi'da controllers/middlewares/requests `app/` ichida tekis qoladi (boshlang'ichlar uchun sodda). `database/`, `resources/`, `lang/` esa 3.1.0'dan boshlab Laravel bilan bir xil joylashgan.
 
 ---
 
