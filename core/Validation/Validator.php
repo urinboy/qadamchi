@@ -128,15 +128,12 @@ class Validator
         $exceptValue = $params[3] ?? null;
 
         try {
-            $sql = "SELECT COUNT(*) FROM `$table` WHERE `$column` = ?";
-            $bindings = [$value];
+            // QueryBuilder orqali — driver-agnostik (grammar quote'siz, oddiy nomlar uchun OK).
+            $query = DB::table($table)->where($column, $value);
             if ($exceptColumn && $exceptValue !== null) {
-                $sql .= " AND `$exceptColumn` != ?";
-                $bindings[] = $exceptValue;
+                $query->where($exceptColumn, '!=', $exceptValue);
             }
-            $stmt = DB::connection()->prepare($sql);
-            $stmt->execute($bindings);
-            return (int) $stmt->fetchColumn() > 0;
+            return $query->count() > 0;
         } catch (\Throwable $e) {
             // Fail-closed: tekshira olmasak — noqonuniy deb hisoblaymiz
             return true;

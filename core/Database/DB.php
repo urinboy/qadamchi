@@ -6,30 +6,85 @@ use PDOException;
 
 /**
  * DB — PDO singleton (Laravel'ning DB facade g'oyasi).
- * config/db.php dan o'qiydi. Transactionlar bilan.
+ * config/db.php dan o'qiydi. Driver-aware DSN: sqlite/mysql/pgsql.
+ *
+ * Default (Laravel 13 uslubida) — SQLite: database/database.sqlite
+ * avtomatik yaratiladi. MySQL/PostgreSQL'ga .env orqali o'tiladi.
  */
 class DB
 {
     protected static ?PDO $pdo = null;
+    protected static ?string $driver = null;
+
+    /** Joriy driver nomi (sqlite | mysql | pgsql). */
+    public static function driver(): string
+    {
+        if (self::$driver === null) {
+            self::$driver = strtolower((string) config('db.driver', 'sqlite'));
+        }
+        return self::$driver;
+    }
 
     public static function connection(): PDO
     {
         if (self::$pdo === null) {
             $config = config('db', []);
-            $driver = $config['driver'] ?? 'mysql';
-            $host = $config['host'] ?? '127.0.0.1';
-            $port = $config['port'] ?? 3306;
-            $name = $config['name'] ?? 'qadamchi';
-            $charset = $config['charset'] ?? 'utf8mb4';
-
-            $dsn = "$driver:host=$host;port=$port;dbname=$name;charset=$charset";
-            self::$pdo = new PDO($dsn, $config['user'] ?? 'root', $config['pass'] ?? '', [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES => false,
-            ]);
+            $driver = self::driver();
+            self::$pdo = self::makeConnection($driver, $config);
         }
         return self::$pdo;
+    }
+
+    protected static function makeConnection(string $driver, array $config): PDO
+    {
+        $options = [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        ];
+
+        if ($driver === 'sqlite') {
+            $path = self::resolveSqlitePath($config);
+            if ($path !== ':memory:') {
+                $dir = dirname($path);
+                if (!is_dir($dir)) @mkdir($dir, 0777, true);
+                if (!file_exists($path)) @touch($path);
+            }
+            $pdo = new PDO('sqlite:' . $path, null, null, $options);
+            // FK cheklovlarini yoqish (Laravel default).
+            if (($config['foreign_keys'] ?? true)) {
+                $pdo->exec('PRAGMA foreign_keys = ON');
+            }
+            return $pdo;
+        }
+
+        // mysql / pgsql
+        $host = $config['host'] ?? '127.0.0.1';
+        $port = $config['port'] ?? '';
+        $name = $config['name'] ?? 'qadamchi';
+        $user = $config['user'] ?? 'root';
+        $pass = $config['pass'] ?? '';
+
+        $dsn = $driver . ':host=' . $host;
+        if ($port !== '' && $port !== null) $dsn .= ';port=' . $port;
+        $dsn .= ';dbname=' . $name;
+        if ($driver === 'mysql') {
+            $charset = $config['charset'] ?? 'utf8mb4';
+            if ($charset !== '') $dsn .= ';charset=' . $charset;
+            $options[PDO::ATTR_EMULATE_PREPARES] = false;
+        }
+
+        return new PDO($dsn, $user, $pass, $options);
+    }
+
+    /** SQLite fayl yo'lini hal qiladi: :memory:, abs yo'l, yoki default database/database.sqlite. */
+    protected static function resolveSqlitePath(array $config): string
+    {
+        $db = (string) ($config['name'] ?? '');
+        if ($db === ':memory:') return ':memory:';
+        if ($db === '') return database_path('database.sqlite');
+        // Ko'rsatilgan qiymat yo'lga o'xshasa (separator yoki kengaytma bor) — shuni ishlatamiz.
+        $looksLikePath = preg_match('#[/\\\\]#', $db) === 1 || preg_match('/\.(sqlite3?|db)$/i', $db) === 1;
+        return $looksLikePath ? $db : database_path($db . '.sqlite');
     }
 
     public static function query(string $sql, array $params = []): \PDOStatement
@@ -86,4 +141,11 @@ class DB
     public static function beginTransaction(): void { self::connection()->beginTransaction(); }
     public static function commit(): void           { self::connection()->commit(); }
     public static function rollBack(): void         { self::connection()->rollBack(); }
+
+    /** Bog'lanishni qayta o'rnatish (config o'zgargandan keyin — testlar uchun). */
+    public static function flush(): void
+    {
+        self::$pdo = null;
+        self::$driver = null;
+    }
 }

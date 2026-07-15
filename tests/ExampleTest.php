@@ -81,4 +81,58 @@ class ExampleTest extends TestCase
         // Handler 404 sahifa chiqaradi (debug=off) yoki 500 (debug=on)
         $this->assertTrue(in_array($resp->status(), [404, 500], true), "Kutilgan 404/500, keldi " . $resp->status());
     }
+
+    /**
+     * Versiya — bitta markaziy manba (Version::VERSION) + config/app.php wiring.
+     */
+    public function test_version_is_3(): void
+    {
+        $this->assertEquals('3.1.0', \Qadamchi\Support\Version::VERSION);
+        $this->assertEquals('3.1.0', config('app.version'));
+    }
+
+    /**
+     * SQLite grammar — Blueprint tomonidan generatsiya qilingan DDL haqiqiy
+     * SQLite'da xatosiz bajarilishi va unique index ishlashi.
+     * (pdo_sqlite yo'q bo'lsa — sokin o'tkazib yuboriladi.)
+     */
+    public function test_sqlite_grammar_executes(): void
+    {
+        if (!extension_loaded('pdo_sqlite')) return; // sqlite yo'q — skip
+
+        $pdo = new \PDO('sqlite::memory:');
+        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+
+        $grammar = new \Qadamchi\Database\Grammars\SQLiteGrammar();
+        $blueprint = new \Qadamchi\Database\Blueprint('users', $grammar);
+        $blueprint->id();
+        $blueprint->string('name');
+        $blueprint->string('email')->unique();
+        $blueprint->string('password');
+        $blueprint->timestamps();
+
+        // Har bir statement (CREATE TABLE + CREATE UNIQUE INDEX) xatosiz bajarilishi kerak.
+        foreach ($blueprint->toCreateStatements() as $sql) {
+            $pdo->exec($sql);
+        }
+
+        $tables = $pdo->query("SELECT name FROM sqlite_master WHERE type='table' AND name='users'")
+                      ->fetchAll(\PDO::FETCH_COLUMN);
+        $this->assertTrue(in_array('users', $tables, true), 'users jadvali sqlite\'da yaratilmadi');
+
+        $indexes = $pdo->query("SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='users'")
+                       ->fetchAll(\PDO::FETCH_COLUMN);
+        $this->assertTrue(in_array('users_email_unique', $indexes, true), 'unique index sqlite\'da yaratilmadi');
+
+        // insert + duplicate unique xato berishi kerak.
+        $now = date('Y-m-d H:i:s');
+        $pdo->exec("INSERT INTO users (name,email,password,created_at,updated_at) VALUES ('A','a@b.uz','x','$now','$now')");
+        $duplicateRejected = false;
+        try {
+            $pdo->exec("INSERT INTO users (name,email,password,created_at,updated_at) VALUES ('B','a@b.uz','x','$now','$now')");
+        } catch (\Throwable $e) {
+            $duplicateRejected = true;
+        }
+        $this->assertTrue($duplicateRejected, 'unique constraint sqlite\'da ishlamadi');
+    }
 }

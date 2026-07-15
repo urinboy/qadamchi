@@ -1,22 +1,33 @@
 <?php
 namespace Qadamchi\Database;
 
+use Qadamchi\Database\Grammars\SchemaGrammar;
+
 /**
  * Schema blueprint — CREATE/ALTER TABLE uchun ustun ta'rifi.
- * Laravel'ning Blueprint g'oyasi, kam kod bilan.
+ * Laravel'ning Blueprint g'oyasi, driver grammar'lar bilan ishlaydi.
+ *
+ * SQL generatsiyasi (ustun turlari, quote, indexlar, ENGINE/CHARSET) grammar'ga
+ * topshiriladi — migration kodi driver-agnostik qoladi.
  */
 class Blueprint
 {
     protected string $table;
     protected array $columns = [];
     protected array $commands = [];
-    protected string $engine = 'InnoDB';
-    protected string $charset = 'utf8mb4';
+    protected SchemaGrammar $grammar;
 
-    public function __construct(string $table)
+    public function __construct(string $table, ?SchemaGrammar $grammar = null)
     {
         $this->table = $table;
+        // Grammar berilmagan bo'lsa, joriy driver bo'yicha default grammar.
+        $this->grammar = $grammar ?? SchemaGrammar::forDriver(DB::driver());
     }
+
+    /** Grammar — Schema va grammar'lar ushbu orqali ustun/jadval ma'lumotini o'qiydi. */
+    public function getGrammar(): SchemaGrammar { return $this->grammar; }
+    public function getTable(): string { return $this->table; }
+    public function getColumns(): array { return $this->columns; }
 
     public function id(string $column = 'id'): ColumnDefinition
     {
@@ -97,75 +108,49 @@ class Blueprint
 
     public function dropColumn(string $column): void { $this->commands[] = ['drop', $column]; }
 
-    // ---- SQL generatsiyasi ----
+    // ---- SQL generatsiyasi (grammar orqali) ----
 
     protected function columnSql(ColumnDefinition $c): string
     {
-        $name = $this->quote($c->name);
-        switch ($c->type) {
-            case 'bigIncrements': $sql = "$name BIGINT UNSIGNED AUTO_INCREMENT"; break;
-            case 'increments':    $sql = "$name INT UNSIGNED AUTO_INCREMENT"; break;
-            case 'string':        $sql = "$name VARCHAR({$c->params['length']})"; break;
-            case 'text':          $sql = "$name TEXT"; break;
-            case 'mediumText':    $sql = "$name MEDIUMTEXT"; break;
-            case 'longText':      $sql = "$name LONGTEXT"; break;
-            case 'integer':       $sql = $c->params['unsigned'] ? "$name INT UNSIGNED" : "$name INT"; break;
-            case 'bigInteger':    $sql = $c->params['unsigned'] ? "$name BIGINT UNSIGNED" : "$name BIGINT"; break;
-            case 'smallInteger':  $sql = "$name SMALLINT"; break;
-            case 'boolean':       $sql = "$name TINYINT(1)"; break;
-            case 'float':         $sql = "$name FLOAT({$c->params['precision']},{$c->params['scale']})"; break;
-            case 'decimal':       $sql = "$name DECIMAL({$c->params['precision']},{$c->params['scale']})"; break;
-            case 'enum':          $list = implode(',', array_map(fn($v) => "'" . addslashes($v) . "'", $c->params['allowed'])); $sql = "$name ENUM($list)"; break;
-            case 'json':          $sql = "$name JSON"; break;
-            case 'date':          $sql = "$name DATE"; break;
-            case 'time':          $sql = "$name TIME"; break;
-            case 'datetime':      $sql = "$name DATETIME"; break;
-            case 'timestamp':     $sql = "$name TIMESTAMP"; break;
-            case 'foreignId':     $sql = "$name BIGINT UNSIGNED"; break;
-            default:              $sql = "$name VARCHAR(255)"; break;
-        }
-
-        if (in_array($c->type, ['bigIncrements', 'increments'], true)) {
-            $sql .= ' PRIMARY KEY';
-        }
-        if ($c->nullable) $sql .= ' NULL'; else $sql .= ' NOT NULL';
-        if ($c->default !== null) {
-            $sql .= " DEFAULT '" . addslashes((string) $c->default) . "'";
-        } elseif ($c->nullable && $c->type === 'timestamp') {
-            $sql .= ' DEFAULT NULL';
-        }
-        if ($c->unique) $sql .= ' UNIQUE';
-        if ($c->index) $sql .= ''; // index alohida
-        if ($c->comment) $sql .= " COMMENT '" . addslashes($c->comment) . "'";
-
-        return $sql;
+        return $this->grammar->compileColumn($c);
     }
 
-    public function toCreateSql(): string
+    /**
+     * CREATE TABLE uchun barcha statementlar (array).
+     * SQLite'da indexlar alohida CREATE INDEX statementlari bo'lishi mumkin.
+     */
+    public function toCreateStatements(): array
     {
         $cols = array_map(fn($c) => $this->columnSql($c), $this->columns);
-        $indexes = [];
-        foreach ($this->columns as $c) {
-            if ($c->unique && !in_array($c->type, ['bigIncrements', 'increments'], true)) {
-                $indexes[] = "UNIQUE KEY {$this->table}_{$c->name}_unique ({$this->quote($c->name)})";
-            }
-            if ($c->index) {
-                $indexes[] = "KEY {$this->table}_{$c->name}_index ({$this->quote($c->name)})";
-            }
-        }
-        $all = implode(', ', array_filter(array_merge($cols, $indexes)));
-        return "CREATE TABLE {$this->quoteIdent($this->table)} ($all) ENGINE={$this->engine} DEFAULT CHARSET={$this->charset}";
+        $indexes = $this->grammar->compileIndexes($this);
+        $inline = $indexes['inline'];
+        $after = $indexes['after'];
+
+        $body = implode(', ', array_filter(array_merge($cols, $inline)));
+        $suffix = $this->grammar->createTableSuffix();
+        $createSql = 'CREATE TABLE ' . $this->grammar->wrap($this->table) . ' (' . $body . ')';
+        if ($suffix !== '') $createSql .= ' ' . $suffix;
+
+        return array_merge([$createSql], $after);
+    }
+
+    /** Eskidek bitta string kerak bo'lsa (kamdan-kam). */
+    public function toCreateSql(): string
+    {
+        $stmts = $this->toCreateStatements();
+        return $stmts[0];
     }
 
     public function toAlterSql(): array
     {
+        $prefix = $this->grammar->alterAddColumnPrefix();
         $sqls = [];
         foreach ($this->columns as $c) {
-            $sqls[] = "ALTER TABLE {$this->quoteIdent($this->table)} ADD {$this->columnSql($c)}";
+            $sqls[] = 'ALTER TABLE ' . $this->grammar->wrap($this->table) . ' ' . $prefix . ' ' . $this->columnSql($c);
         }
         foreach ($this->commands as $cmd) {
             if ($cmd[0] === 'drop') {
-                $sqls[] = "ALTER TABLE {$this->quoteIdent($this->table)} DROP COLUMN {$this->quote($cmd[1])}";
+                $sqls[] = 'ALTER TABLE ' . $this->grammar->wrap($this->table) . ' DROP COLUMN ' . $this->grammar->wrap($cmd[1]);
             }
         }
         return $sqls;
@@ -173,11 +158,13 @@ class Blueprint
 
     public function toDropSql(): string
     {
-        return "DROP TABLE IF EXISTS {$this->quoteIdent($this->table)}";
+        return 'DROP TABLE IF EXISTS ' . $this->grammar->wrap($this->table);
     }
 
-    protected function quote(string $name): string { return "`$name`"; }
-    protected function quoteIdent(string $name): string { return "`$name`"; }
+    public function toDropNoIfSql(): string
+    {
+        return 'DROP TABLE ' . $this->grammar->wrap($this->table);
+    }
 }
 
 class ColumnDefinition
