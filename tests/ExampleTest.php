@@ -87,8 +87,8 @@ class ExampleTest extends TestCase
      */
     public function test_version_is_3(): void
     {
-        $this->assertEquals('3.1.0', \Qadamchi\Support\Version::VERSION);
-        $this->assertEquals('3.1.0', config('app.version'));
+        $this->assertEquals('3.2.0', \Qadamchi\Support\Version::VERSION);
+        $this->assertEquals('3.2.0', config('app.version'));
     }
 
     /**

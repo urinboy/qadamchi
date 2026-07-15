@@ -3,6 +3,35 @@
 Ushbu loyihadagi barcha muhim o'zgarishlar shu faylda qayd etiladi.
 Format — [Keep a Changelog](https://keepachangelog.com/) asosida, versiyalash esa [SemVer](https://semver.org/) qoidalariga amal qiladi.
 
+## [3.2.0] - 2026-07-16
+
+### Qo'shildi
+
+- Docs viewer UI/UX to'liq qayta dizayn: dark mode (light/dark almashtirgich + localStorage,
+  FOUC'siz inline script), reading progress bar, TOC + scrollspy (IntersectionObserver),
+  heading anchor'lar, kod blokidan nusxa olish tugmasi, index sahifada client-side qidiruv,
+  prev/next navigatsiya, breadcrumb.
+- `public/assets/docs.css` — docs'gina komponentlar (prose, code, callout, toc, prev-next,
+  progress, syntax highlight token'lari, dark variantlar).
+- `public/assets/docs.js` — theme toggle, scrollspy, copy, search, progress (vanilla JS, defer).
+- `core/Support/Markdown.php` kengaytirildi: `slugify()`, heading ID + anchor, `toc()`,
+  fenced code block (til label + nusxa tugmasi), `highlight()` — php/bash/sh/json/env
+  sintaksis bo'yogi (o'z tokenizer, Composer'siz), callout blockquote (`> **Eslatma:**` va h.k.),
+  ichki doc havolalarini qayta yozish (`foo.md#slug` → `/docs/foo#slug`).
+- Yangi hujjatlar: `docs/tarix.md` (versiyalar bo'yicha to'liq tarix), `docs/tuzilma.md`
+  (joriy 3.2.0 loyiha daraxti).
+
+### O'zgartirildi
+
+- `app/Controllers/DocsController.php` — metadata (title/desc/cat/icon) + kategoriya
+  guruhlari (Boshlash/Yo'riqnomalar/Reference/Tarix) + `neighbors()` (prev/next) + TOC.
+- Docs view'lari (`layouts/docs`, `docs/index`, `docs/show`) to'liq qayta yozildi.
+- `public/assets/app.css` — dark token override'lar (`html[data-theme="dark"]`) + `.prose` dark.
+- 7 ta `.md` + `README.md` to'liq polish: 3.2.0 struktura, Factory bo'limlari, PSR-4 map,
+  CLI reference jadvali, tarixiy banner (`qadamchi_v2.1.md`).
+- `qadamchi_cli.md` (CLI binary) va `qadamchi-commands.md` (reference jadvali) rollarga ajratildi.
+- Versiya: `3.1.0` → `3.2.0`.
+
 ## [3.1.0] - 2026-07-16
 
 ### O'zgartirildi
@@ -59,5 +88,6 @@ Format — [Keep a Changelog](https://keepachangelog.com/) asosida, versiyalash 
 - `.env` fayli versiya nazoratidan chiqarildi (endi `.gitignore`da).
 - Eski flat core/app fayllari, ishlatilmayotgan `Post` modeli va eski migratsiyalar.
 
+[3.2.0]: https://github.com/urinboy/qadamchi/releases/tag/v3.2.0
 [3.1.0]: https://github.com/urinboy/qadamchi/releases/tag/v3.1.0
 [3.0.0]: https://github.com/urinboy/qadamchi/releases/tag/v3.0.0
