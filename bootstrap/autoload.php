@@ -11,8 +11,10 @@
 
 spl_autoload_register(function ($class) {
     $prefixes = [
-        'Qadamchi\\' => __DIR__ . '/../core/',
-        'App\\'      => __DIR__ . '/../app/',
+        'Qadamchi\\'          => __DIR__ . '/../core/',
+        'App\\'               => __DIR__ . '/../app/',
+        'Database\\Seeders\\' => __DIR__ . '/../database/seeders/',
+        'Database\\Factories\\' => __DIR__ . '/../database/factories/',
     ];
 
     foreach ($prefixes as $prefix => $base) {
