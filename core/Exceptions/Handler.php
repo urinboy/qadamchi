@@ -100,11 +100,11 @@ class Handler
         try {
             // Blade view: errors/{code}.blade.php yoki errors/default.blade.php
             $view = 'errors.' . $code;
-            if (is_file(base_path('app/Views/errors/' . $code . '.blade.php'))) {
+            if (is_file(resource_path('views/errors/' . $code . '.blade.php'))) {
                 echo \Qadamchi\View\View::render($view, ['code' => $code, 'message' => $message]);
                 return;
             }
-            if (is_file(base_path('app/Views/errors/default.blade.php'))) {
+            if (is_file(resource_path('views/errors/default.blade.php'))) {
                 echo \Qadamchi\View\View::render('errors.default', ['code' => $code, 'message' => $message]);
                 return;
             }
@@ -118,7 +118,7 @@ class Handler
     {
         http_response_code(self::httpCode($e));
         try {
-            if (is_file(base_path('app/Views/errors/debug.blade.php'))) {
+            if (is_file(resource_path('views/errors/debug.blade.php'))) {
                 echo \Qadamchi\View\View::render('errors.debug', ['exception' => $e]);
                 return;
             }

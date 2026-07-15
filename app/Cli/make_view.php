@@ -1,9 +1,11 @@
 <?php
 /**
  * make:view — yangi Blade view generatsiya qiladi (.blade.php, layout bilan).
- * php qadamchi make:view posts/show      -> app/Views/posts/show.blade.php
- * php qadamchi make:view home --flat     -> app/Views/home.blade.php (layoutsiz)
+ * php qadamchi make:view posts/show      -> resources/views/posts/show.blade.php
+ * php qadamchi make:view home --flat     -> resources/views/home.blade.php (layoutsiz)
  */
+require_once __DIR__ . '/../../bootstrap/cli.php';
+
 $name = $argv[2] ?? null;
 if (!$name) {
     echo "View nomini kiriting (masalan: posts/show)!\n";
@@ -12,7 +14,7 @@ if (!$name) {
 
 $flat = in_array('--flat', array_slice($argv, 3), true);
 $name = str_replace('\\', '/', $name);
-$path = "app/Views/{$name}.blade.php";
+$path = resource_path("views/{$name}.blade.php");
 
 $dir = dirname($path);
 if (!is_dir($dir)) {

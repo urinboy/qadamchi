@@ -7,7 +7,7 @@ use Qadamchi\Http\Request;
 /**
  * View — shablonni render qilish (Blade compile + cache).
  * View::render('layouts.app', ['title'=>'Salom']) -> string.
- * views: app/Views/{name}.php yoki .blade.php
+ * views: resources/views/{name}.php yoki .blade.php
  */
 class View
 {
@@ -56,7 +56,7 @@ class View
 
     protected static function resolve(string $name): ?string
     {
-        $base = self::$viewPath ?: base_path('app/Views');
+        $base = self::$viewPath ?: resource_path('views');
         $relative = str_replace('.', '/', $name);
 
         foreach (["$relative.blade.php", "$relative.php"] as $file) {
