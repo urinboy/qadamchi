@@ -1,0 +1,44 @@
+# Qadamchi — root .htaccess (Apache / mod_rewrite)
+# Dokument root loyiha ILDIZIGA teng bo'lganda (public/ emas).
+# install.php to'g'ridan-to'g'li ishlaydi; app so'rovlari public/index.php'ga,
+# statik fayllar (assets) public/ ichidan serve qilinadi.
+
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews
+    </IfModule>
+
+    Options -Indexes
+    RewriteEngine On
+
+    # Authorization header'ini saqlash.
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # 1) Root'dagi real fayl/katalog (install.php) — to'g'ridan-to'g'li serve.
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # 2) public/ ichidagi statik fayllar — /assets/app.css → public/assets/app.css.
+    RewriteCond %{DOCUMENT_ROOT}/public%{REQUEST_URI} -f
+    RewriteRule ^(.*)$ public/$1 [L]
+
+    # 3) Qolgan so'rovlar → public/index.php (front controller).
+    RewriteRule ^ public/index.php [L]
+</IfModule>
+
+# Yashirin / nozik fayllarni bloklash (.env, .htaccess, .git* — ildizda).
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+<FilesMatch "\.(env|lock|log)$">
+    Require all denied
+</FilesMatch>
+
+# .env faylini qattiq bloklash.
+<Files ".env">
+    Require all denied
+</Files>
+
+AddDefaultCharset UTF-8

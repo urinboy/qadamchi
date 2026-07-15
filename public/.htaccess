@@ -1,0 +1,39 @@
+# Qadamchi — public/.htaccess (Apache / mod_rewrite)
+# Dokument root public/ ga teng bo'lganda (standart Laravel uslubi).
+# Barcha so'rovlarni front controller — index.php'ga yo'naltiradi.
+
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews
+    </IfModule>
+
+    Options -Indexes
+    RewriteEngine On
+
+    # Authorization header'ini saqlash (Bearer tokenlar uchun).
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Trailing slash'ni olib tashlash: /docs/ → /docs (301).
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [L,R=301]
+
+    # Mavjud fayl/katalog bo'lsa — to'g'ridan-to'g'li serve (assets, favicon, install.php).
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# Yashirin / nozik fayllarni bloklash (.env, .htaccess'ning o'zi, .git*).
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+# config/storage fayllarni ham bloklash (xavfsizlik).
+<FilesMatch "\.(env|lock|log|md|json)$">
+    Require all denied
+</FilesMatch>
+
+# Default charset.
+AddDefaultCharset UTF-8
