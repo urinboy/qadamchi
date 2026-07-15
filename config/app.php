@@ -1,6 +1,7 @@
 <?php
 return [
     'name' => env('APP_NAME', 'Qadamchi'),
+    'version' => \Qadamchi\Support\Version::VERSION,
     'env' => env('APP_ENV', 'local'),
     'debug' => env('APP_DEBUG', true),
     'key' => env('APP_KEY', ''),
