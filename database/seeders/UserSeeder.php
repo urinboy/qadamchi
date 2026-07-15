@@ -1,5 +1,8 @@
 <?php
+namespace Database\Seeders;
+
 use App\Models\User;
+use Qadamchi\Database\Seeder;
 
 class UserSeeder extends Seeder
 {

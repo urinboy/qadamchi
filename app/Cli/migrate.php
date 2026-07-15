@@ -3,8 +3,10 @@
  * Qadamchi migrate.php — migration runner (Laravel uslubidagi DB-table tracking).
  * bootstrap/cli.php orqali yuklanadi (config(), DB::connection(), Schema, aliaslar).
  *
+ * Driver-agnostik: SQLite / MySQL / PostgreSQL bilan ishlaydi (grammar orqali).
+ *
  * Foydalanish (qadamchi router'dan):
- *   php qadamchi migrate        -> up
+ *   php qadamchi migrate         -> up
  *   php qadamchi migrate:rollback -> down
  *   php qadamchi migrate:reset    -> reset
  *   php qadamchi migrate:fresh    -> fresh
@@ -14,6 +16,8 @@
 require_once __DIR__ . '/../../bootstrap/cli.php';
 
 use Qadamchi\Database\DB;
+use Qadamchi\Database\Schema;
+use Qadamchi\Database\Blueprint;
 
 $cmd = $argv[1] ?? 'up';
 // `php qadamchi migrate` (subcommandsiz) -> 'up'
@@ -32,20 +36,27 @@ function migrationTableName(): string
     return $name ?: 'migrations';
 }
 
+/** Migration tracking jadvali nomini grammar quote qilgan holda qaytaradi. */
+function migrationTableWrapped(): string
+{
+    return Schema::grammar()->wrap(migrationTableName());
+}
+
 function ensureMigrationTable(PDO $pdo): void
 {
     $table = migrationTableName();
-    $pdo->exec("CREATE TABLE IF NOT EXISTS `$table` (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        migration VARCHAR(255) NOT NULL,
-        batch INT NOT NULL,
-        migrated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )");
+    if (Schema::hasTable($table)) return;
+    Schema::create($table, function (Blueprint $t) {
+        $t->id();
+        $t->string('migration');
+        $t->integer('batch');
+        $t->timestamp('migrated_at')->nullable();
+    });
 }
 
 function getAllMigrations(): array
 {
-    $files = glob(base_path('app/Migrations') . '/*.php');
+    $files = glob(database_path('migrations') . '/*.php');
     sort($files);
     $migrations = [];
     foreach ($files as $file) {
@@ -56,24 +67,23 @@ function getAllMigrations(): array
 
 function getRanMigrations(PDO $pdo): array
 {
-    $table = migrationTableName();
-    $q = $pdo->query("SELECT migration FROM `$table`");
-    return $q ? $q->fetchAll(PDO::FETCH_COLUMN) : [];
+    $table = migrationTableWrapped();
+    $rows = DB::select("SELECT migration FROM $table");
+    return array_map(fn($r) => $r['migration'], $rows);
 }
 
 function getLastBatch(PDO $pdo): int
 {
-    $table = migrationTableName();
-    $q = $pdo->query("SELECT MAX(batch) FROM `$table`");
-    return (int) ($q ? $q->fetchColumn() : 0);
+    $table = migrationTableWrapped();
+    $rows = DB::select("SELECT MAX(batch) AS max_batch FROM $table");
+    return (int) ($rows[0]['max_batch'] ?? 0);
 }
 
 function getBatchMigrations(PDO $pdo, int $batch): array
 {
-    $table = migrationTableName();
-    $stmt = $pdo->prepare("SELECT migration FROM `$table` WHERE batch = ? ORDER BY id DESC");
-    $stmt->execute([$batch]);
-    return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    $table = migrationTableWrapped();
+    $rows = DB::select("SELECT migration FROM $table WHERE batch = ? ORDER BY id DESC", [$batch]);
+    return array_map(fn($r) => $r['migration'], $rows);
 }
 
 function migrationClassName(string $filename): string
@@ -106,6 +116,19 @@ function applyMigration(string $file, string $method): bool
     return true;
 }
 
+/** Migration yozuvi — driver-agnostik (grammar quote). */
+function recordMigration(string $name, int $batch): void
+{
+    $table = migrationTableWrapped();
+    DB::statement("INSERT INTO $table (migration, batch) VALUES (?, ?)", [$name, $batch]);
+}
+
+function forgetMigration(string $name): void
+{
+    $table = migrationTableWrapped();
+    DB::statement("DELETE FROM $table WHERE migration = ?", [$name]);
+}
+
 // --- up mantiqi (fresh ham shuni chaqiradi) ---
 function run_migrate_up(PDO $pdo): void
 {
@@ -117,8 +140,7 @@ function run_migrate_up(PDO $pdo): void
     foreach ($all as $name => $file) {
         if (in_array($name, $ran)) continue;
         if (applyMigration($file, 'up')) {
-            $stmt = $pdo->prepare("INSERT INTO `" . migrationTableName() . "` (migration, batch) VALUES (?, ?)");
-            $stmt->execute([$name, $batch]);
+            recordMigration($name, $batch);
             echo "Migrated: $name\n";
             $count++;
         }
@@ -140,11 +162,10 @@ if ($cmd === 'down') {
     $toRollback = getBatchMigrations($pdo, $batch);
     if (!$toRollback) { echo "Rollback qilinadigan migration yo'q.\n"; exit(0); }
     foreach ($toRollback as $name) {
-        $file = base_path('app/Migrations/' . $name . '.php');
+        $file = database_path('migrations/' . $name . '.php');
         if (!is_file($file)) continue;
         if (applyMigration($file, 'down')) {
-            $stmt = $pdo->prepare("DELETE FROM `" . migrationTableName() . "` WHERE migration = ?");
-            $stmt->execute([$name]);
+            forgetMigration($name);
             echo "Rolled back: $name\n";
         }
     }
@@ -154,15 +175,14 @@ if ($cmd === 'down') {
 // --- reset (hammasini down) ---
 if ($cmd === 'reset') {
     ensureMigrationTable($pdo);
-    $table = migrationTableName();
-    $q = $pdo->query("SELECT migration FROM `$table` ORDER BY id DESC");
-    $all = $q ? $q->fetchAll(PDO::FETCH_COLUMN) : [];
+    $table = migrationTableWrapped();
+    $rows = DB::select("SELECT migration FROM $table ORDER BY id DESC");
+    $all = array_map(fn($r) => $r['migration'], $rows);
     foreach ($all as $name) {
-        $file = base_path('app/Migrations/' . $name . '.php');
+        $file = database_path('migrations/' . $name . '.php');
         if (!is_file($file)) continue;
         if (applyMigration($file, 'down')) {
-            $stmt = $pdo->prepare("DELETE FROM `$table` WHERE migration = ?");
-            $stmt->execute([$name]);
+            forgetMigration($name);
             echo "Rolled back: $name\n";
         }
     }
@@ -171,16 +191,7 @@ if ($cmd === 'reset') {
 
 // --- fresh (barcha jadvallarni drop + qayta up) ---
 if ($cmd === 'fresh') {
-    // Barcha jadvallarni topamiz va drop qilamiz (Laravel migrate:fresh kabi).
-    $rows = $pdo->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
-    if ($rows) {
-        $pdo->exec("SET FOREIGN_KEY_CHECKS = 0");
-        foreach ($rows as $tbl) {
-            $pdo->exec("DROP TABLE IF EXISTS `$tbl`");
-            echo "Dropped table: $tbl\n";
-        }
-        $pdo->exec("SET FOREIGN_KEY_CHECKS = 1");
-    }
+    Schema::dropAllTables();
     echo "Barcha jadvallar o'chirildi.\n";
     run_migrate_up($pdo);
     exit(0);

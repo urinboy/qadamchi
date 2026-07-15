@@ -1,5 +1,9 @@
 <?php
 
+namespace Database\Seeders;
+
+use Qadamchi\Database\Seeder;
+
 class {{class}} extends Seeder
 {
     public function run(): void
