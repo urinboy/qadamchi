@@ -60,6 +60,40 @@ if (!function_exists('public_path')) {
     }
 }
 
+if (!function_exists('database_path')) {
+    /**
+     * database/ papkasi yo'li. SQLite default fayli shu yerda:
+     * database/database.sqlite. public/ tashqarisida — veb orqali yetib bormaydi.
+     * Shuningdek: database/migrations, database/seeders, database/factories.
+     */
+    function database_path(string $path = ''): string
+    {
+        return base_path('database/' . ltrim($path, '/'));
+    }
+}
+
+if (!function_exists('resource_path')) {
+    /**
+     * resources/ papkasi yo'li (Laravel uslubi).
+     * Blade view'lar: resources/views.
+     */
+    function resource_path(string $path = ''): string
+    {
+        return base_path('resources/' . ltrim($path, '/'));
+    }
+}
+
+if (!function_exists('lang_path')) {
+    /**
+     * lang/ papkasi yo'li (Laravel 11+ root lang/).
+     * Tarjima fayllari: lang/{locale}/{file}.php.
+     */
+    function lang_path(string $path = ''): string
+    {
+        return base_path('lang/' . ltrim($path, '/'));
+    }
+}
+
 if (!function_exists('route')) {
     function route(string $name, array $params = []): ?string
     {
