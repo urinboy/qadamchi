@@ -16,21 +16,114 @@ use Qadamchi\Exceptions\RouteNotFoundException;
  */
 class DocsController extends Controller
 {
-    /** Ruxsat etilgan hujjatlar: fayl nomi (kengaytmasiz) => sarlavha. */
+    /** Kategoriya tartibi (index'da shu ketma-ketlikda chiqadi). */
+    private array $catOrder = ['Boshlash', 'Yo\'riqnomalar', 'Reference', 'Tarix'];
+
+    /** Ruxsat etilgan hujjatlar: fayl nomi => metadata (title/desc/cat/icon). */
     private array $docs = [
-        'tushunchalar'      => "Tushunchalar bo'yicha qo'llanma",
-        'laravel-otish'     => "Qadamchi → Laravel o'tish",
-        'a-b-otish'         => "A → B versiyasiga o'tish",
-        'qadamchi-commands' => "Qadamchi CLI buyruqlari",
-        'qadamchi_cli'      => "Qadamchi CLI qo'llanma",
-        'qadamchi_v2.1'     => "Qadamchi v2.1 strukturasi",
-        'installatsiya'     => "O'rnatish — install.php",
+        // Boshlash
+        'installatsiya' => [
+            'title' => "O'rnatish — install.php",
+            'desc'  => 'Bitta-fayl installer, .htaccess, SQLite/MySQL sozlash.',
+            'cat'   => 'Boshlash',
+            'icon'  => 'download',
+        ],
+        'tushunchalar' => [
+            'title' => "Tushunchalar bo'yicha qo'llanma",
+            'desc'  => 'Har tushuncha + "Laravel\'da bu..." eslatmasi.',
+            'cat'   => 'Boshlash',
+            'icon'  => 'book',
+        ],
+        // Yo'riqnomalar
+        'laravel-otish' => [
+            'title' => "Qadamchi → Laravel o'tish",
+            'desc'  => 'Qadamchi\'da o\'rganib, Laravel\'ga oson o\'tish xaritasi.',
+            'cat'   => 'Yo\'riqnomalar',
+            'icon'  => 'map',
+        ],
+        'a-b-otish' => [
+            'title' => 'A → B versiyasiga o\'tish',
+            'desc'  => 'Composer\'siz (A) → Composer (B) bosqichlari, seam\'lar.',
+            'cat'   => 'Yo\'riqnomalar',
+            'icon'  => 'exchange',
+        ],
+        // Reference
+        'qadamchi-commands' => [
+            'title' => 'Qadamchi CLI buyruqlari',
+            'desc'  => 'Barcha CLI buyruqlari — to\'liq reference jadvali.',
+            'cat'   => 'Reference',
+            'icon'  => 'list',
+        ],
+        'qadamchi_cli' => [
+            'title' => 'Qadamchi CLI qo\'llanma',
+            'desc'  => 'CLI binary: joylash, shebang, ruxsat, kengaytirish.',
+            'cat'   => 'Reference',
+            'icon'  => 'terminal',
+        ],
+        'tuzilma' => [
+            'title' => 'Loyiha tuzilmasi',
+            'desc'  => 'Joriy versiya (3.2.0) loyiha strukturasi — to\'liq daraxt.',
+            'cat'   => 'Reference',
+            'icon'  => 'tree',
+        ],
+        // Tarix
+        'tarix' => [
+            'title' => 'Qadamchi tarixi',
+            'desc'  => 'Eng boshidan hozirgacha — versiyalar bo\'yicha to\'liq tarix.',
+            'cat'   => 'Tarix',
+            'icon'  => 'history',
+        ],
+        'qadamchi_v2.1' => [
+            'title' => 'Qadamchi v2.1 strukturasi',
+            'desc'  => 'Tarixiy arxiv — v2.1 dagi fayl joylashuvi.',
+            'cat'   => 'Tarix',
+            'icon'  => 'archive',
+        ],
     ];
+
+    /** Kategoriya bo'yicha guruhlangan hujjatlar (index uchun). */
+    private function groups(): array
+    {
+        $groups = [];
+        foreach ($this->catOrder as $cat) {
+            $items = [];
+            foreach ($this->docs as $name => $meta) {
+                if (($meta['cat'] ?? '') === $cat) {
+                    $items[$name] = $meta;
+                }
+            }
+            if ($items) {
+                $groups[] = ['cat' => $cat, 'items' => $items];
+            }
+        }
+        return $groups;
+    }
+
+    /** Berilgan hujjatning qo'shnilari (prev/next) metadata bo'yicha tartibda. */
+    private function neighbors(string $name): array
+    {
+        $order = array_keys($this->docs);
+        $idx = array_search($name, $order, true);
+        $prev = $idx > 0 ? $this->docLink($order[$idx - 1]) : null;
+        $next = ($idx !== false && $idx < count($order) - 1) ? $this->docLink($order[$idx + 1]) : null;
+        return [$prev, $next];
+    }
+
+    private function docLink(string $name): ?array
+    {
+        if (!isset($this->docs[$name])) {
+            return null;
+        }
+        return ['name' => $name, 'title' => $this->docs[$name]['title']];
+    }
 
     /** Hujjatlar ro'yxati (TOC). */
     public function index()
     {
-        return view('docs.index', ['docs' => $this->docs]);
+        return view('docs.index', [
+            'docs'   => $this->docs,
+            'groups' => $this->groups(),
+        ]);
     }
 
     /** Bitta hujjatni render qiladi. */
@@ -51,13 +144,19 @@ class DocsController extends Controller
         $path = base_path('docs/' . $name . '.md');
         $md = is_file($path) ? file_get_contents($path) : '';
         $html = Markdown::toHtml($md);
+        $toc = Markdown::toc($md);
+        [$prev, $next] = $this->neighbors($name);
 
         return view('docs.show', [
             'html'    => $html,
+            'toc'     => $toc,
             'name'    => $name,
             'current' => $name,
-            'title'   => $this->docs[$name],
+            'title'   => $this->docs[$name]['title'],
+            'meta'    => $this->docs[$name],
             'docs'    => $this->docs,
+            'prev'    => $prev,
+            'next'    => $next,
         ]);
     }
 
