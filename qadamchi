@@ -2,8 +2,18 @@
 <?php
 $argv = $_SERVER['argv'];
 $argc = $_SERVER['argc'];
+
+// Versiya flag'i — dispatch'dan oldin (autoload arqali Version sinfi yetib keladi).
+require_once __DIR__ . '/bootstrap/autoload.php';
+if ($argc >= 2 && in_array($argv[1], ['--version', '-v', 'version'], true)) {
+    echo "Qadamchi " . \Qadamchi\Support\Version::VERSION . " (CLI)\n";
+    exit;
+}
+
 if ($argc < 2) {
-    echo "Qadamchi CLI v2.2 – php qadamchi <command> [options]\n";
+    echo "Qadamchi CLI v" . \Qadamchi\Support\Version::VERSION . " – php qadamchi <command> [options]\n";
+    echo "Versiya: php qadamchi --version\n";
+    echo "Buyruqlar: php qadamchi list\n";
     exit;
 }
 $command = str_replace(':', '_', $argv[1]);

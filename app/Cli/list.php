@@ -2,7 +2,7 @@
 /**
  * list — barcha mavjud qadamchi buyruqlarini ro'yxati.
  */
-echo "Qadamchi CLI — mavjud buyruqlar:\n\n";
+echo "Qadamchi CLI v" . \Qadamchi\Support\Version::VERSION . " — mavjud buyruqlar:\n\n";
 
 $commands = [
     'migrate'              => 'Migrationlarni ishga tushirish (up)',
@@ -16,6 +16,7 @@ $commands = [
     'make:model'           => 'Yangi model generatsiya',
     'make:migration'       => 'Yangi migration generatsiya',
     'make:seeder'          => 'Yangi seeder generatsiya',
+    'make:factory'         => 'Yangi factory generatsiya',
     'make:middleware'      => 'Yangi middleware generatsiya',
     'make:request'         => 'Yangi FormRequest generatsiya',
     'make:view'            => 'Yangi Blade view generatsiya [--flat]',

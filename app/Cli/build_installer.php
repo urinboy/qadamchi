@@ -12,21 +12,26 @@ $base = dirname(__DIR__, 2); // loyiha ildizi
 $outFile = $base . '/install.php';
 
 // Pakkalanadigan papkalar va fayllar
-$packDirs = ['core', 'app', 'bootstrap', 'config', 'routes', 'public', 'docs', 'tests'];
+$packDirs = ['core', 'app', 'bootstrap', 'config', 'routes', 'public', 'docs', 'tests', 'database', 'resources', 'lang'];
 $packFiles = ['qadamchi', '.env.namuna', 'README.md', 'composer.json', '.htaccess'];
 
 // Exclude qoidalari: papkalar prefix bilan, alohida fayllar aniqlikda.
 $excludeDirPrefixes = ['storage/', 'vendor/', '.git/', 'node_modules/'];
 $excludeExact = ['install.php', '.env']; // .env.namuna EMAS — u kerak!
+// SQLite runtime fayllari ham pack qilinmasin — yangi o'rnatilishda bo'sh bo'lsin.
+$excludeSuffixes = ['.sqlite', '.sqlite-journal', '.sqlite-wal', '.sqlite-shm', '.db'];
 
 $manifest = [];
 
-$exclude = function (string $rel) use ($excludeDirPrefixes, $excludeExact): bool {
+$exclude = function (string $rel) use ($excludeDirPrefixes, $excludeExact, $excludeSuffixes): bool {
     $rel = str_replace('\\', '/', $rel);
     foreach ($excludeDirPrefixes as $ex) {
         if (str_starts_with($rel, $ex)) return true;
     }
     if (in_array($rel, $excludeExact, true)) return true;
+    foreach ($excludeSuffixes as $sfx) {
+        if (str_ends_with($rel, $sfx)) return true;
+    }
     return false;
 };
 
@@ -126,7 +131,7 @@ foreach ($manifest as $rel => $content) {
 echo "Yozildi: $written ta fayl.\n";
 
 // 4) Runtime papkalar
-foreach (['storage/logs', 'storage/framework/views', 'storage/framework/cache', 'storage/framework/sessions'] as $d) {
+foreach (['storage/logs', 'storage/framework/views', 'storage/framework/cache', 'storage/framework/sessions', 'database'] as $d) {
     if (!is_dir($base . '/' . $d)) @mkdir($base . '/' . $d, 0777, true);
     @touch($base . '/' . $d . '/.gitkeep');
 }
@@ -153,8 +158,9 @@ if (file_exists($envFile)) {
 
 echo "\nO'rnatish tugadi!\n";
 echo "Keyingi qadamlar:\n";
-echo "  1. .env faylida DB sozlamalarini kiriting (DB_HOST, DB_NAME, ...)\n";
-echo "  2. php qadamchi migrate        (jadval yaratish)\n";
+echo "  1. .env faylida DB sozlamalari (default: SQLite, database/database.sqlite).\n";
+echo "     MySQL/PostgreSQL'ga o'tish uchun DB_CONNECTION va DB_* qiymatlarini o'zgartiring.\n";
+echo "  2. php qadamchi migrate        (jadval yaratish — SQLite fayli avtomatik yaratiladi)\n";
 echo "  3. php qadamchi db:seed         (namuna ma'lumot)\n";
 echo "  4. php qadamchi serve           (http://localhost:8080)\n";
 
