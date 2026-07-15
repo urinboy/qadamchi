@@ -1,21 +1,28 @@
 <?php
 namespace App\Middlewares;
 
-use Middleware;
-use CSRF;
+use Qadamchi\Http\Middleware;
+use Qadamchi\Http\CSRF;
+use Qadamchi\Http\Response;
 
-class VerifyCSRF extends Middleware {
-    public function handle($request, $next) {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $token = $_POST[CSRF::TOKEN_NAME] ?? null;
-            
+/**
+ * CSRF middleware — POST/PUT/PATCH/DELETE so'rovlarida token tekshiradi.
+ * bootstrap/app.php da global middleware sifatida yoqilgan (GET o'tkazib yuboradi).
+ */
+class VerifyCSRF extends Middleware
+{
+    public function handle($request, \Closure $next)
+    {
+        $method = $request->method();
+
+        if (in_array($method, ['POST', 'PUT', 'PATCH', 'DELETE'], true)) {
+            $token = $request->input('_token');
             if (!CSRF::validateToken($token)) {
                 http_response_code(419);
-                echo "CSRF token mismatch";
-                exit;
+                return Response::make('CSRF token mos emas (419).', 419);
             }
         }
-        
+
         return $next($request);
     }
 }
