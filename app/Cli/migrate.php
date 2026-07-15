@@ -1,38 +1,39 @@
 <?php
 /**
- * Qadamchi migrate.php
- * Migrationlarni boshqaruvchi CLI script
+ * Qadamchi migrate.php — migration runner (Laravel uslubidagi DB-table tracking).
+ * bootstrap/cli.php orqali yuklanadi (config(), DB::connection(), Schema, aliaslar).
+ *
+ * Foydalanish (qadamchi router'dan):
+ *   php qadamchi migrate        -> up
+ *   php qadamchi migrate:rollback -> down
+ *   php qadamchi migrate:reset    -> reset
+ *   php qadamchi migrate:fresh    -> fresh
+ * Yoki to'g'ridan-to'g'ri: php app/Cli/migrate.php [up|down|reset|fresh]
  */
 
-require_once __DIR__ . '/../../core/Migration.php';
+require_once __DIR__ . '/../../bootstrap/cli.php';
+
+use Qadamchi\Database\DB;
 
 $cmd = $argv[1] ?? 'up';
+// `php qadamchi migrate` (subcommandsiz) -> 'up'
+if ($cmd === 'migrate') $cmd = 'up';
 
-$db = require __DIR__ . '/../../config/db.php';
-$pdo = null;
 try {
-    $dsn = "mysql:host={$db['host']};dbname={$db['name']};charset=utf8mb4";
-    $pdo = new PDO($dsn, $db['user'], $db['pass'], [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-    ]);
-} catch (Exception $e) {
+    $pdo = DB::connection();
+} catch (\Throwable $e) {
     echo "DB ulanishda xatolik: {$e->getMessage()}\n";
     exit(1);
 }
 
-function migrationTableName() {
-    $env = __DIR__ . '/../../.env';
-    if (!file_exists($env)) return 'migrations';
-    $lines = file($env, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    foreach ($lines as $line) {
-        if (stripos($line, 'MIGRATION_TABLE=') === 0) {
-            return trim(explode('=', $line, 2)[1]);
-        }
-    }
-    return 'migrations';
+function migrationTableName(): string
+{
+    $name = config('db.migration_table', 'migrations');
+    return $name ?: 'migrations';
 }
 
-function ensureMigrationTable($pdo) {
+function ensureMigrationTable(PDO $pdo): void
+{
     $table = migrationTableName();
     $pdo->exec("CREATE TABLE IF NOT EXISTS `$table` (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -42,42 +43,53 @@ function ensureMigrationTable($pdo) {
     )");
 }
 
-function getAllMigrations() {
-    $files = glob(__DIR__ . '/../../app/Migrations/*.php'); // TUZATILDI!
+function getAllMigrations(): array
+{
+    $files = glob(base_path('app/Migrations') . '/*.php');
     sort($files);
     $migrations = [];
     foreach ($files as $file) {
-        $base = basename($file, '.php');
-        $migrations[$base] = $file;
+        $migrations[basename($file, '.php')] = $file;
     }
     return $migrations;
 }
 
-function getRanMigrations($pdo) {
+function getRanMigrations(PDO $pdo): array
+{
     $table = migrationTableName();
     $q = $pdo->query("SELECT migration FROM `$table`");
     return $q ? $q->fetchAll(PDO::FETCH_COLUMN) : [];
 }
 
-function getLastBatch($pdo) {
+function getLastBatch(PDO $pdo): int
+{
     $table = migrationTableName();
     $q = $pdo->query("SELECT MAX(batch) FROM `$table`");
-    return (int)($q ? $q->fetchColumn() : 0);
+    return (int) ($q ? $q->fetchColumn() : 0);
 }
 
-function getBatchMigrations($pdo, $batch) {
+function getBatchMigrations(PDO $pdo, int $batch): array
+{
     $table = migrationTableName();
     $stmt = $pdo->prepare("SELECT migration FROM `$table` WHERE batch = ? ORDER BY id DESC");
     $stmt->execute([$batch]);
     return $stmt->fetchAll(PDO::FETCH_COLUMN);
 }
 
-function migrationClassName($filename) {
+function migrationClassName(string $filename): string
+{
     $base = preg_replace('/^(\d+_)+/', '', $filename);
     return str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $base)));
 }
 
-function applyMigration($file, $method) {
+function applyMigration(string $file, string $method): bool
+{
+    // Migration fayli compile bo'lishidan OLDIN aliaslarni yaratamiz
+    // (aks holda `function (Blueprint $t)` type-hint'i alias hali yo'qligi uchun xato beradi).
+    class_exists('Schema', true);
+    class_exists('Blueprint', true);
+    class_exists('Migration', true);
+
     require_once $file;
     $base = basename($file, '.php');
     $class = migrationClassName($base);
@@ -94,8 +106,9 @@ function applyMigration($file, $method) {
     return true;
 }
 
-// --- Command: up ---
-if ($cmd === 'up') {
+// --- up mantiqi (fresh ham shuni chaqiradi) ---
+function run_migrate_up(PDO $pdo): void
+{
     ensureMigrationTable($pdo);
     $all = getAllMigrations();
     $ran = getRanMigrations($pdo);
@@ -110,20 +123,25 @@ if ($cmd === 'up') {
             $count++;
         }
     }
-    if ($count == 0) echo "Barcha migrationlar bajarilgan.\n";
+    if ($count === 0) echo "Barcha migrationlar bajarilgan.\n";
+}
+
+// --- up ---
+if ($cmd === 'up') {
+    run_migrate_up($pdo);
     exit(0);
 }
 
-// --- Command: down ---
+// --- down (rollback oxirgi batch) ---
 if ($cmd === 'down') {
     ensureMigrationTable($pdo);
     $batch = getLastBatch($pdo);
-    if ($batch < 1) { echo "Rollback qilinadigan migration yo'q.\n"; exit(0);}
+    if ($batch < 1) { echo "Rollback qilinadigan migration yo'q.\n"; exit(0); }
     $toRollback = getBatchMigrations($pdo, $batch);
-    if (!$toRollback) { echo "Rollback qilinadigan migration yo'q.\n"; exit(0);}
+    if (!$toRollback) { echo "Rollback qilinadigan migration yo'q.\n"; exit(0); }
     foreach ($toRollback as $name) {
-        $file = __DIR__ . '/../../app/Migrations/' . $name . '.php';
-        if (!file_exists($file)) continue;
+        $file = base_path('app/Migrations/' . $name . '.php');
+        if (!is_file($file)) continue;
         if (applyMigration($file, 'down')) {
             $stmt = $pdo->prepare("DELETE FROM `" . migrationTableName() . "` WHERE migration = ?");
             $stmt->execute([$name]);
@@ -133,15 +151,15 @@ if ($cmd === 'down') {
     exit(0);
 }
 
-// --- Command: reset ---
+// --- reset (hammasini down) ---
 if ($cmd === 'reset') {
     ensureMigrationTable($pdo);
     $table = migrationTableName();
     $q = $pdo->query("SELECT migration FROM `$table` ORDER BY id DESC");
     $all = $q ? $q->fetchAll(PDO::FETCH_COLUMN) : [];
     foreach ($all as $name) {
-        $file = __DIR__ . '/../../app/Migrations/' . $name . '.php';
-        if (!file_exists($file)) continue;
+        $file = base_path('app/Migrations/' . $name . '.php');
+        if (!is_file($file)) continue;
         if (applyMigration($file, 'down')) {
             $stmt = $pdo->prepare("DELETE FROM `$table` WHERE migration = ?");
             $stmt->execute([$name]);
@@ -151,18 +169,23 @@ if ($cmd === 'reset') {
     exit(0);
 }
 
-// --- Command: fresh ---
+// --- fresh (barcha jadvallarni drop + qayta up) ---
 if ($cmd === 'fresh') {
-    $table = migrationTableName();
-    $pdo->exec("DROP TABLE IF EXISTS `$table`");
-    echo "Migration table dropped.\n";
-    // up'ni qayta chaqirish
-    $_SERVER['argv'][1] = 'up';
-    require __FILE__;
+    // Barcha jadvallarni topamiz va drop qilamiz (Laravel migrate:fresh kabi).
+    $rows = $pdo->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
+    if ($rows) {
+        $pdo->exec("SET FOREIGN_KEY_CHECKS = 0");
+        foreach ($rows as $tbl) {
+            $pdo->exec("DROP TABLE IF EXISTS `$tbl`");
+            echo "Dropped table: $tbl\n";
+        }
+        $pdo->exec("SET FOREIGN_KEY_CHECKS = 1");
+    }
+    echo "Barcha jadvallar o'chirildi.\n";
+    run_migrate_up($pdo);
     exit(0);
 }
 
-// --- Unknown command ---
 echo "Noto'g'ri komanda: $cmd\n";
-echo "To'g'ri foydalanish: php cli/migrate.php [up|down|reset|fresh]\n";
+echo "Foydalanish: php qadamchi migrate [up|down|reset|fresh]\n";
 exit(1);

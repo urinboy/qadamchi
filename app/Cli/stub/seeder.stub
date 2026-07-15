@@ -1,8 +1,9 @@
 <?php
-use Seeder;
 
-class {{class}} extends Seeder {
-    public function run() {
-        //
+class {{class}} extends Seeder
+{
+    public function run(): void
+    {
+        // namuna: App\Models\User::create([...])
     }
 }

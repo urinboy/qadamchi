@@ -1,24 +1,37 @@
 <?php
+/**
+ * make:view — yangi Blade view generatsiya qiladi (.blade.php, layout bilan).
+ * php qadamchi make:view posts/show      -> app/Views/posts/show.blade.php
+ * php qadamchi make:view home --flat     -> app/Views/home.blade.php (layoutsiz)
+ */
 $name = $argv[2] ?? null;
-if (!$name) { 
-    echo "View nomini kiriting!\n"; 
+if (!$name) {
+    echo "View nomini kiriting (masalan: posts/show)!\n";
     exit(1);
 }
 
-$filename = str_replace(['.', '\\', '/'], '_', $name);
-$path = "app/Views/{$filename}.php";
+$flat = in_array('--flat', array_slice($argv, 3), true);
+$name = str_replace('\\', '/', $name);
+$path = "app/Views/{$name}.blade.php";
 
-// app/Views papkasini yaratish (agar yo'q bo'lsa)
-if (!is_dir('app/Views')) {
-    mkdir('app/Views', 0777, true);
+$dir = dirname($path);
+if (!is_dir($dir)) {
+    mkdir($dir, 0777, true);
 }
-
-if (file_exists($path)) { 
-    echo "View mavjud: $path\n"; 
+if (file_exists($path)) {
+    echo "View mavjud: $path\n";
     exit(1);
 }
 
-$stub = file_get_contents(__DIR__.'/stub/view.stub');
-$stub = str_replace('{{name}}', $filename, $stub);
+$viewName = basename($name);
+
+if ($flat) {
+    $stub = "<!-- {{name}} view -->\n<h1>{{ \$title ?? '{{name}}' }}</h1>\n";
+} else {
+    $stub = "@extends('layouts.app')\n\n@section('content')\n    <h1>{{ \$title ?? '{{name}}' }}</h1>\n@endsection\n";
+}
+
+$stub = str_replace('{{name}}', $viewName, $stub);
 file_put_contents($path, $stub);
 echo "View yaratildi: $path\n";
+echo "Foydalanish: return view('{$name}', [...]);\n";

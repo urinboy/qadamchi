@@ -1,0 +1,15 @@
+<?php
+/**
+ * {{class}} — `php qadamchi test` bilan ishga tushadi.
+ * TestCase metodlari: get($uri), post($uri, $data), assertEquals/assertTrue/assertFalse/assertCount.
+ */
+use Qadamchi\Testing\TestCase;
+
+class {{class}} extends TestCase
+{
+    public function test_example(): void
+    {
+        $resp = $this->get('/');
+        $this->assertEquals(200, $resp->status());
+    }
+}
