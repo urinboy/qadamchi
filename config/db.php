@@ -1,10 +1,8 @@
 <?php
-require_once __DIR__ . '/../core/dotenv.php';
-load_env();
-
 return [
     'driver' => env('DB_CONNECTION', 'mysql'),
-    'host' => env('DB_HOST', '127.127.126.4'),
+    'host' => env('DB_HOST', '127.0.0.1'),
+    'port' => env('DB_PORT', 3306),
     'name' => env('DB_DATABASE', 'qadamchi'),
     'user' => env('DB_USERNAME', 'root'),
     'pass' => env('DB_PASSWORD', ''),
