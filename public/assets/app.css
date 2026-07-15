@@ -282,3 +282,53 @@ input:focus, textarea:focus, select:focus {
     .prose h1 { font-size: 25px; }
     .prose h2 { font-size: 20px; }
 }
+
+/* ============================================================
+   Dark mode — html[data-theme="dark"]  (3.2.0)
+   Shared komponentlar (topbar/card/input/prose) uchun override'lar.
+   Docs'gina komponentlar (.code/.docs-toc/...) docs.css'da.
+   ============================================================ */
+html[data-theme="dark"] {
+    --primary: #5b7cfa;
+    --primary-dark: #8aa4ff;
+    --primary-light: rgba(91, 124, 250, .14);
+    --primary-hover-bg: rgba(91, 124, 250, .22);
+    --primary-border: #3a445e;
+    --text: #e7e9f3;
+    --muted: #9aa1b8;
+    --border: #2a3045;
+    --grad-from: #161924;
+    --grad-to: #0e1018;
+    --shadow-sm: 0 2px 10px rgba(0, 0, 0, .30);
+    --shadow-md: 0 12px 30px rgba(0, 0, 0, .34);
+    --shadow-lg: 0 20px 60px rgba(0, 0, 0, .40);
+    --primary-shadow: 0 6px 18px rgba(91, 124, 250, .30);
+}
+html[data-theme="dark"] body { background: linear-gradient(120deg, var(--grad-from) 0%, var(--grad-to) 100%); }
+html[data-theme="dark"] .topbar { background: rgba(18, 21, 30, .82); border-bottom-color: var(--border); }
+html[data-theme="dark"] .brand-mark,
+html[data-theme="dark"] .auth-card .auth-brand img { background: #1b1f2c; }
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .docs-card,
+html[data-theme="dark"] .docs-side { background: #1b1f2c; border-color: var(--border); }
+html[data-theme="dark"] .btn.white { background: #232838; color: var(--primary-dark); border-color: var(--border); }
+html[data-theme="dark"] .btn.white:hover { background: var(--primary-hover-bg); border-color: var(--primary); }
+html[data-theme="dark"] .btn.ghost { background: var(--primary-light); color: var(--primary-dark); }
+html[data-theme="dark"] input,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] select { background: #14171f; border-color: var(--border); color: var(--text); }
+/* prose dark */
+html[data-theme="dark"] .prose { color: var(--text); }
+html[data-theme="dark"] .prose h1 { border-bottom-color: var(--border); }
+html[data-theme="dark"] .prose h2 { color: var(--primary-dark); border-bottom-color: var(--border); }
+html[data-theme="dark"] .prose h4 { color: var(--muted); }
+html[data-theme="dark"] .prose code { background: var(--primary-light); color: var(--primary-dark); }
+html[data-theme="dark"] .prose pre { background: #14171f; border-color: var(--border); }
+html[data-theme="dark"] .prose pre code { color: var(--text); }
+html[data-theme="dark"] .prose blockquote { background: var(--primary-light); border-left-color: var(--primary); }
+html[data-theme="dark"] .prose table th { background: var(--primary-light); color: var(--primary-dark); }
+html[data-theme="dark"] .prose table th,
+html[data-theme="dark"] .prose table td { border-color: var(--border); }
+html[data-theme="dark"] .prose table tr:nth-child(even) td { background: #14171f; }
+html[data-theme="dark"] .footer { color: #5a607a; }
+html[data-theme="dark"] .hero-big { color: rgba(91, 124, 250, .10); }
