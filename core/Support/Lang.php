@@ -3,7 +3,7 @@ namespace Qadamchi\Support;
 
 /**
  * Tarjima (Laravel'ning trans() g'oyasi).
- * app/Lang/{locale}/{file}.php massivlardan o'qiydi.
+ * lang/{locale}/{file}.php massivlardan o'qiydi.
  * Lang::get('auth.failed'), trans('messages.welcome', ['name'=>'Ali'])
  */
 class Lang
@@ -66,7 +66,7 @@ class Lang
         if (isset(self::$cache[$locale][$file])) {
             return self::$cache[$locale][$file];
         }
-        $path = base_path("app/Lang/$locale/$file.php");
+        $path = lang_path("$locale/$file.php");
         self::$cache[$locale][$file] = is_file($path) ? (array) require $path : [];
         return self::$cache[$locale][$file];
     }
