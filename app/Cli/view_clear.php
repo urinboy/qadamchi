@@ -1,8 +1,7 @@
 <?php
 /**
- * cache:clear — ilova keshini tozalaydi (storage/framework/cache).
- * Laravel'dagi kabi: bu "application cache" — cache:put/remember bilan yozilganlar.
- * Compiled Blade view'lar uchun view:clear'ni ishlating.
+ * view:clear — compiled Blade view'larini tozalaydi (storage/framework/views).
+ * Laravel'dagi kabi: keyingi so'rovda view'lar qayta compile qilinadi.
  */
 require_once __DIR__ . '/../../bootstrap/cli.php';
 
@@ -24,6 +23,6 @@ function clearDir(string $dir): int
     return $count;
 }
 
-$cache = clearDir(storage_path('framework/cache'));
+$views = clearDir(storage_path('framework/views'));
 
-echo "Ilova keshi tozalandi — $cache ta fayl o'chirildi.\n";
+echo "View keshi tozalandi — $views ta compiled fayl o'chirildi.\n";

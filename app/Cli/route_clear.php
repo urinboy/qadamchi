@@ -1,8 +1,9 @@
 <?php
 /**
- * cache:clear — ilova keshini tozalaydi (storage/framework/cache).
- * Laravel'dagi kabi: bu "application cache" — cache:put/remember bilan yozilganlar.
- * Compiled Blade view'lar uchun view:clear'ni ishlating.
+ * route:clear — route keshini tozalaydi.
+ * Hozircha route'lar har so'rovda routes/web.php'dan o'qiladi (persisted kesh yo'q),
+ * shuning uchun bu no-op xabar beradi. Kelajakda route:cache qo'shilsa,
+ * storage/framework/routes va bootstrap/cache/routes.php'ni tozalaydi.
  */
 require_once __DIR__ . '/../../bootstrap/cli.php';
 
@@ -24,6 +25,11 @@ function clearDir(string $dir): int
     return $count;
 }
 
-$cache = clearDir(storage_path('framework/cache'));
+$count = clearDir(storage_path('framework/routes'));
+$file = base_path('bootstrap/cache/routes.php');
+if (is_file($file)) {
+    @unlink($file);
+    $count++;
+}
 
-echo "Ilova keshi tozalandi — $cache ta fayl o'chirildi.\n";
+echo "Route keshi tozalandi — $count ta fayl o'chirildi.\n";
