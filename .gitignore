@@ -9,6 +9,12 @@
 vendor/
 node_modules/
 
+# SQLite ma'lumotlar bazasi (mahalliy, runtime)
+database/*.sqlite
+database/*.sqlite-journal
+database/*.sqlite-wal
+database/*.sqlite-shm
+
 # Storage (runtime)
 storage/logs/*
 !storage/logs/.gitkeep
