@@ -2,6 +2,9 @@
 .env
 .env.*.local
 
+# O'rnatish belgisi (mashinaga xos, install.php generatsiya qiladi)
+.installed
+
 # Ishlab chiqarish qoldiqlari
 vendor/
 node_modules/
