@@ -20,47 +20,30 @@
         </span>
     </header>
 
-    <section class="dash-grid">
-        <div class="dash-card dash-profile">
+    <section class="dash-id">
+        <div class="dash-id-head">
             <div class="dash-avatar">{{ $initial }}</div>
-            <div class="dash-profile-main">
+            <div class="dash-id-main">
                 <div class="dash-name">{{ $user->name }}</div>
-                <div class="dash-email">{{ $user->email }}</div>
-            </div>
-            <div class="dash-profile-meta">
-                <div class="pm">
-                    <span class="pm-label">Ro'yxatdan o'tgan</span>
-                    <span class="pm-val">{{ $joined }}</span>
-                </div>
-                <div class="pm">
-                    <span class="pm-label">Status</span>
-                    <span class="pm-val">Faol</span>
+                <div class="dash-id-email">
+                    <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                    <span>{{ $user->email }}</span>
                 </div>
             </div>
         </div>
-
-        <div class="dash-card dash-stat">
-            <div class="dash-stat-top">
-                <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                <span class="lbl">Foydalanuvchi ID</span>
+        <div class="dash-id-meta">
+            <div class="dim">
+                <span class="dim-label">ID</span>
+                <span class="dim-val">#{{ $user->id }}</span>
             </div>
-            <span class="dash-stat-val">#{{ $user->id }}</span>
-        </div>
-
-        <div class="dash-card dash-stat">
-            <div class="dash-stat-top">
-                <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
-                <span class="lbl">Email manzil</span>
+            <div class="dim">
+                <span class="dim-label">Ro'yxatdan o'tgan</span>
+                <span class="dim-val">{{ $joined }}</span>
             </div>
-            <span class="dash-stat-val">{{ $user->email }}</span>
-        </div>
-
-        <div class="dash-card dash-stat">
-            <div class="dash-stat-top">
-                <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
-                <span class="lbl">Sessiya</span>
+            <div class="dim">
+                <span class="dim-label">Sessiya</span>
+                <span class="dim-val">Kirilgan</span>
             </div>
-            <span class="dash-stat-val">Kirilgan</span>
         </div>
     </section>
 
