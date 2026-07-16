@@ -278,6 +278,12 @@ abstract class Model
     protected function performInsert(): void
     {
         $data = $this->onlyFillable($this->attributes);
+        // Timestamp'lar fillable'ga kirmaydi — lekin mass-assignment'dan ozod
+        // (Laravel uslubida) doimo yoziladi.
+        if ($this->timestamps) {
+            if (isset($this->attributes['created_at'])) $data['created_at'] = $this->attributes['created_at'];
+            if (isset($this->attributes['updated_at'])) $data['updated_at'] = $this->attributes['updated_at'];
+        }
         $id = DB::table($this->getTable())->insert($data);
         $this->attributes[$this->primaryKey] = $id;
         $this->exists = true;
