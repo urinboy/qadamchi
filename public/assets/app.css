@@ -401,3 +401,21 @@ html[data-theme="dark"] .modal-icon { background: #3a2a12; }
 @keyframes qd-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes qd-pop { from { opacity: 0; transform: translateY(8px) scale(.97); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .modal-backdrop, .modal-dialog { animation: none; } }
+
+/* Toastr xabarnomalar */
+.toast-container { position: fixed; top: 16px; right: 16px; z-index: 1100; display: flex; flex-direction: column; gap: 10px; max-width: min(360px, calc(100vw - 32px)); pointer-events: none; }
+.toast { position: relative; display: flex; align-items: flex-start; gap: 10px; padding: 13px 36px 13px 14px; border-radius: 12px; box-shadow: var(--shadow-md); background: var(--card, #fff); border: 1px solid var(--border); color: var(--text); font-size: 14px; line-height: 1.45; pointer-events: auto; animation: qd-toast-in .25s ease-out; overflow: hidden; }
+.toast.is-leaving { animation: qd-toast-out .2s ease-in forwards; }
+.toast svg { width: 20px; height: 20px; flex-shrink: 0; margin-top: 1px; }
+.toast-body { flex: 1; min-width: 0; }
+.toast-close { position: absolute; top: 8px; right: 8px; background: none; border: 0; color: var(--muted); font-size: 20px; line-height: 1; cursor: pointer; padding: 2px 6px; border-radius: 6px; }
+.toast-close:hover { color: var(--text); background: var(--primary-light); }
+.toast-progress { position: absolute; left: 0; bottom: 0; height: 3px; width: 100%; opacity: .35; animation: qd-toast-bar 4s linear forwards; transform-origin: left; }
+.toast-success { border-left: 4px solid #2f9e44; } .toast-success svg { fill: #2f9e44; } .toast-success .toast-progress { background: #2f9e44; }
+.toast-error { border-left: 4px solid #e03131; } .toast-error svg { fill: #e03131; } .toast-error .toast-progress { background: #e03131; }
+.toast-info { border-left: 4px solid #1c7ed6; } .toast-info svg { fill: #1c7ed6; } .toast-info .toast-progress { background: #1c7ed6; }
+html[data-theme="dark"] .toast { background: #1b1f2c; }
+@keyframes qd-toast-in { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: none; } }
+@keyframes qd-toast-out { to { opacity: 0; transform: translateX(24px); } }
+@keyframes qd-toast-bar { from { width: 100%; } to { width: 0; } }
+@media (prefers-reduced-motion: reduce) { .toast, .toast-progress { animation: none; } }

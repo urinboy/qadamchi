@@ -28,7 +28,7 @@ class AuthController extends Controller
         ]);
 
         Auth::login($user);
-        return redirect('/');
+        return redirect('/')->with('success', 'Ro\'yxatdan o\'tish muvaffaqiyatli! Xush kelibsiz, ' . $user->name . '.');
     }
 
     /** Kirish formasi. */
@@ -43,7 +43,8 @@ class AuthController extends Controller
         $credentials = $request->only('email', 'password');
 
         if (Auth::attempt($credentials)) {
-            return redirect('/');
+            $name = Auth::user()->name ?? '';
+            return redirect('/')->with('success', 'Xush kelibsiz' . ($name ? ', ' . $name : '') . '!');
         }
 
         return back()->with('error', 'Email yoki parol noto\'g\'ri.');
@@ -53,6 +54,6 @@ class AuthController extends Controller
     public function logout()
     {
         Auth::logout();
-        return redirect('/');
+        return redirect('/')->with('success', 'Siz tizimdan muvaffaqiyatli chiqdingiz.');
     }
 }

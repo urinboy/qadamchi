@@ -50,8 +50,31 @@
     </style>
 </head>
 <body>
-    @if (session()->getFlash('success'))
-        <div class="flash alert success">{{ session()->getFlash('success') }}</div>
+    @php
+        $flashes = [
+            'success' => session()->getFlash('success'),
+            'error'   => session()->getFlash('error'),
+            'info'    => session()->getFlash('info'),
+        ];
+        $toastIcons = [
+            'success' => 'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z',
+            'error'   => 'M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z',
+            'info'    => 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z',
+        ];
+    @endphp
+    @if (array_filter($flashes))
+        <div class="toast-container" id="toastContainer">
+            @foreach ($flashes as $type => $msg)
+                @if ($msg)
+                    <div class="toast toast-{{ $type }}" data-auto="4000" role="{{ $type === 'error' ? 'alert' : 'status' }}">
+                        <svg viewBox="0 0 24 24"><path d="{{ $toastIcons[$type] }}"></path></svg>
+                        <span class="toast-body">{{ $msg }}</span>
+                        <button type="button" class="toast-close" aria-label="Yopish">&times;</button>
+                        <span class="toast-progress"></span>
+                    </div>
+                @endif
+            @endforeach
+        </div>
     @endif
 
     <main class="landing">
@@ -123,6 +146,8 @@
     <footer class="footer">
         &copy; {{ date('Y') }} <a href="https://urinboydev.uz" target="_blank" rel="noopener">UrinboyDev</a> tomonidan yaratilgan<br>Qadamchi PHP Mikrofreymvork
     </footer>
+
+    <script src="/assets/toast.js"></script>
 
     @auth
     <form id="logoutForm" action="{{ route('logout') }}" method="POST" class="logout-form">@csrf</form>
