@@ -1,28 +1,116 @@
 @extends('layouts.app')
 
-@section('container_class', 'wide')
+@section('container_class', 'fluid')
 
 @section('content')
-    <div class="card">
-        <h1>Dashboard</h1>
-        <p class="sub">Bu sahifa <code>auth</code> middleware bilan himoyalangan — faqat kirgan user ko'radi.</p>
+@php
+    $initial = mb_strtoupper(mb_substr($user->name ?? '?', 0, 1));
+    $joined = $user->created_at ? date('d.m.Y', strtotime($user->created_at)) : '—';
+@endphp
 
-        <div class="field">
-            <label>Ism</label>
-            <p class="value">{{ $user->name }}</p>
+<div class="dash">
+    <header class="dash-head">
+        <div>
+            <h1>Dashboard</h1>
+            <p class="sub">Bu sahifa <code>auth</code> middleware bilan himoyalangan — faqat kirgan foydalanuvchi ko'radi. Boshqa hech kim bu yerga yetib bira olmaydi.</p>
         </div>
-        <div class="field">
-            <label>Email</label>
-            <p class="value">{{ $user->email }}</p>
-        </div>
-        <div class="field">
-            <label>ID</label>
-            <p class="value">{{ $user->id }}</p>
+        <span class="dash-badge">
+            <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+            auth · himoyalangan
+        </span>
+    </header>
+
+    <section class="dash-grid">
+        <div class="dash-card dash-profile">
+            <div class="dash-avatar">{{ $initial }}</div>
+            <div class="dash-profile-main">
+                <div class="dash-name">{{ $user->name }}</div>
+                <div class="dash-email">{{ $user->email }}</div>
+            </div>
+            <div class="dash-profile-meta">
+                <div class="pm">
+                    <span class="pm-label">Ro'yxatdan o'tgan</span>
+                    <span class="pm-val">{{ $joined }}</span>
+                </div>
+                <div class="pm">
+                    <span class="pm-label">Status</span>
+                    <span class="pm-val">Faol</span>
+                </div>
+            </div>
         </div>
 
-        <div class="row">
-            <a class="btn ghost" href="{{ route('home') }}"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Bosh sahifaga qaytish</a>
-            <a class="btn ghost" href="{{ route('docs.index') }}"><svg viewBox="0 0 24 24"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/></svg>Hujjatlar</a>
+        <div class="dash-card dash-stat">
+            <div class="dash-stat-top">
+                <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                <span class="lbl">Foydalanuvchi ID</span>
+            </div>
+            <span class="dash-stat-val">#{{ $user->id }}</span>
         </div>
+
+        <div class="dash-card dash-stat">
+            <div class="dash-stat-top">
+                <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                <span class="lbl">Email manzil</span>
+            </div>
+            <span class="dash-stat-val">{{ $user->email }}</span>
+        </div>
+
+        <div class="dash-card dash-stat">
+            <div class="dash-stat-top">
+                <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
+                <span class="lbl">Sessiya</span>
+            </div>
+            <span class="dash-stat-val">Kirilgan</span>
+        </div>
+    </section>
+
+    <section class="dash-section">
+        <h2>Bu namuna nima ko'rsatadi</h2>
+        <div class="dash-features">
+            <div class="dash-feat">
+                <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+                <div class="dash-feat-body">
+                    <div class="dash-feat-title">Auth middleware</div>
+                    <div class="dash-feat-desc">Faqat kirgan foydalanuvchi ko'radi — aks holda <code>/login</code>'ga yo'naltiradi.</div>
+                </div>
+            </div>
+            <div class="dash-feat">
+                <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6z"/></svg>
+                <div class="dash-feat-body">
+                    <div class="dash-feat-title">Session-based Auth</div>
+                    <div class="dash-feat-desc"><code>Auth::attempt/logout</code>, session regenerate, <code>auth</code>/<code>guest</code> direktivlari.</div>
+                </div>
+            </div>
+            <div class="dash-feat">
+                <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                <div class="dash-feat-body">
+                    <div class="dash-feat-title">Eloquent'ga o'xshash Model</div>
+                    <div class="dash-feat-desc"><code>User</code> modeli — <code>fillable</code>, <code>hidden</code>, <code>timestamps</code>.</div>
+                </div>
+            </div>
+            <div class="dash-feat">
+                <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+                <div class="dash-feat-body">
+                    <div class="dash-feat-title">Blade + layout</div>
+                    <div class="dash-feat-desc"><code>@extends</code>, <code>@section</code>, <code>@yield</code> — layout inheritance.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="dash-actions">
+        <a class="btn ghost" href="{{ route('home') }}">
+            <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            Bosh sahifa
+        </a>
+        <a class="btn ghost" href="{{ route('docs.index') }}">
+            <svg viewBox="0 0 24 24"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/></svg>
+            Hujjatlar
+        </a>
+        <button type="button" class="btn" data-logout>
+            <svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+            Chiqish
+        </button>
     </div>
+</div>
 @endsection

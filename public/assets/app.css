@@ -332,3 +332,72 @@ html[data-theme="dark"] .prose table td { border-color: var(--border); }
 html[data-theme="dark"] .prose table tr:nth-child(even) td { background: #14171f; }
 html[data-theme="dark"] .footer { color: #5a607a; }
 html[data-theme="dark"] .hero-big { color: rgba(91, 124, 250, .10); }
+
+/* ============================================================
+   Dashboard — to'liq kenglik, erkin layout (3.2.0)
+   docs-main kabi fluid: max-width yo'q, padding clamp bilan.
+   ============================================================ */
+.container.fluid { max-width: none; padding: 32px clamp(16px, 5vw, 80px); }
+.dash { max-width: 1280px; margin: 0 auto; }
+
+.dash-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 26px; }
+.dash-head h1 { font-size: clamp(26px, 3.5vw, 32px); font-weight: 800; letter-spacing: -.02em; color: var(--primary); margin: 0 0 6px; }
+.dash-head .sub { color: var(--muted); font-size: 15px; max-width: 580px; line-height: 1.55; }
+.dash-badge { display: inline-flex; align-items: center; gap: 6px; background: var(--primary-light); color: var(--primary-dark); border: 1px solid var(--primary-border); border-radius: 999px; padding: 7px 14px; font-size: 13px; font-weight: 600; white-space: nowrap; }
+.dash-badge svg { width: 14px; height: 14px; fill: currentColor; }
+
+.dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 18px; margin-bottom: 24px; }
+.dash-card { background: #fff; border: 1px solid var(--border); border-radius: var(--r-lg); padding: 22px; box-shadow: var(--shadow-sm); }
+
+.dash-profile { grid-column: 1 / -1; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; padding: 26px 28px; box-shadow: var(--shadow-md); }
+.dash-avatar { width: 64px; height: 64px; border-radius: 18px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 800; flex-shrink: 0; box-shadow: var(--primary-shadow); }
+.dash-profile-main { min-width: 0; }
+.dash-name { font-size: 22px; font-weight: 800; color: var(--text); letter-spacing: -.01em; }
+.dash-email { color: var(--muted); font-size: 15px; word-break: break-all; }
+.dash-profile-meta { margin-left: auto; display: flex; gap: 28px; flex-wrap: wrap; }
+.dash-profile-meta .pm { display: flex; flex-direction: column; gap: 2px; }
+.dash-profile-meta .pm-label { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: #adb5bd; font-weight: 700; }
+.dash-profile-meta .pm-val { font-size: 15px; font-weight: 600; color: var(--text); }
+
+.dash-stat { display: flex; flex-direction: column; gap: 10px; }
+.dash-stat-top { display: flex; align-items: center; gap: 9px; }
+.dash-stat-top svg { width: 20px; height: 20px; fill: var(--primary); flex-shrink: 0; }
+.dash-stat-top .lbl { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.dash-stat-val { font-size: 19px; font-weight: 700; color: var(--text); word-break: break-all; }
+
+.dash-section { background: #fff; border: 1px solid var(--border); border-radius: var(--r-lg); padding: 26px 28px; box-shadow: var(--shadow-sm); margin-bottom: 24px; }
+.dash-section h2 { font-size: 18px; font-weight: 700; color: var(--primary); margin-bottom: 16px; }
+.dash-features { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+.dash-feat { display: flex; align-items: flex-start; gap: 12px; padding: 15px 16px; background: var(--primary-light); border-radius: var(--r-md); }
+.dash-feat svg { width: 22px; height: 22px; fill: var(--primary); flex-shrink: 0; margin-top: 1px; }
+.dash-feat-body { min-width: 0; }
+.dash-feat-title { font-weight: 700; color: var(--text); font-size: 15px; }
+.dash-feat-desc { color: var(--muted); font-size: 13px; line-height: 1.5; margin-top: 2px; }
+
+.dash-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.dash-actions form { display: inline; }
+
+/* Dashboard dark */
+html[data-theme="dark"] .dash-card,
+html[data-theme="dark"] .dash-section { background: #1b1f2c; border-color: var(--border); }
+html[data-theme="dark"] .dash-profile-meta .pm-label { color: #5a607a; }
+/* Logout confirmation modal */
+.logout-form { display: none; }
+.modal { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.modal[hidden] { display: none; }
+.modal-backdrop { position: absolute; inset: 0; background: rgba(15, 18, 30, .55); backdrop-filter: blur(2px); animation: qd-fade .15s ease-out; }
+.modal-dialog { position: relative; z-index: 1; width: 100%; max-width: 420px; background: var(--card, #fff); border-radius: var(--r-lg, 16px); box-shadow: var(--shadow-md); padding: 28px 26px 22px; text-align: center; animation: qd-pop .18s ease-out; }
+html[data-theme="dark"] .modal-dialog { background: #1b1f2c; border: 1px solid var(--border); }
+.modal-icon { width: 56px; height: 56px; margin: 0 auto 14px; border-radius: 50%; background: #fff3e0; color: #f59e0b; display: flex; align-items: center; justify-content: center; }
+.modal-icon svg { width: 30px; height: 30px; fill: currentColor; }
+html[data-theme="dark"] .modal-icon { background: #3a2a12; }
+.modal-dialog h3 { font-size: 20px; font-weight: 800; color: var(--primary); margin: 0 0 10px; }
+.modal-text { color: var(--muted); font-size: 14px; line-height: 1.6; margin: 0 0 22px; }
+.modal-actions { display: flex; gap: 12px; justify-content: center; }
+.modal-actions .btn { min-width: 130px; justify-content: center; }
+.btn.danger { background: #e03131; color: #fff; border-color: #e03131; }
+.btn.danger:hover { background: #c92a2a; border-color: #c92a2a; }
+.btn.danger svg { fill: #fff; }
+@keyframes qd-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes qd-pop { from { opacity: 0; transform: translateY(8px) scale(.97); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .modal-backdrop, .modal-dialog { animation: none; } }

@@ -26,6 +26,27 @@
         .app-label { font-size: .82rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #adb5bd; margin: 22px 0 10px; }
         .greeting { color: var(--muted); font-weight: 500; font-size: .98rem; margin: 0 6px; }
         .flash { max-width: 560px; margin: 24px auto 0; }
+
+        /* Ilova demo — terminal mockup (har doim qorong'i — terminal estetikasi) */
+        .terminal { max-width: 560px; margin: 6px auto 0; background: #1b2030; border: 1px solid #2a3045; border-radius: 14px; box-shadow: var(--shadow-md); overflow: hidden; text-align: left; }
+        .term-bar { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #15192a; border-bottom: 1px solid #2a3045; }
+        .term-dots { display: inline-flex; gap: 7px; }
+        .term-dots span { width: 12px; height: 12px; border-radius: 50%; display: block; }
+        .term-dots .r { background: #ff5f57; } .term-dots .y { background: #febc2e; } .term-dots .g { background: #28c840; }
+        .term-title { color: #6c7086; font-size: 13px; font-family: var(--mono); }
+        .term-body { padding: 16px 20px; font-family: var(--mono); font-size: 13.5px; line-height: 1.85; color: #c7cbe0; white-space: pre; overflow-x: auto; }
+        .term-body .p { color: #5b7cfa; }   /* prompt $ */
+        .term-body .c { color: #e7e9f3; }   /* buyruq */
+        .term-body .o { color: #9aa1b8; }   /* output */
+        .term-body .v { color: #febc2e; }   /* versiya */
+        .term-body .a { color: #28c840; }   /* o'q / ok */
+        .term-body .r { color: #8aa4ff; }   /* route path */
+        .term-body .m { color: #6c7086; }   /* method/hint */
+        .term-cursor { display: inline-block; width: 8px; height: 15px; background: #5b7cfa; vertical-align: -2px; margin-left: 3px; animation: qd-blink 1.1s steps(1) infinite; }
+        @keyframes qd-blink { 50% { opacity: 0; } }
+        @media (prefers-reduced-motion: reduce) { .term-cursor { animation: none; } }
+        .demo-cta { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 12px; margin-top: 20px; }
+        .demo-cta .btn { padding: 12px 22px; }
     </style>
 </head>
 <body>
@@ -57,15 +78,29 @@
         </div>
 
         <div class="app-label">Ilova demo</div>
-        <div class="links">
+        <div class="terminal" role="img" aria-label="Qadamchi CLI serve va route'lar ro'yxati">
+            <div class="term-bar">
+                <span class="term-dots"><span class="r"></span><span class="y"></span><span class="g"></span></span>
+                <span class="term-title">~/qadamchi</span>
+            </div>
+            <div class="term-body"><span class="p">$</span> <span class="c">php qadamchi serve</span>
+<span class="o">Qadamchi</span> <span class="v">{{ \Qadamchi\Support\Version::VERSION }}</span> <span class="a">→</span> <span class="o">http://localhost:8080</span>
+
+<span class="m">  GET</span>  <span class="r">/</span>            <span class="a">→</span> <span class="o">home</span>
+<span class="m">  GET</span>  <span class="r">/dashboard</span>   <span class="a">→</span> <span class="o">auth</span>
+<span class="m">  GET</span>  <span class="r">/docs</span>        <span class="a">→</span> <span class="o">docs</span>
+<span class="m">  GET</span>  <span class="r">/login</span>       <span class="a">→</span> <span class="o">guest</span>
+<span class="m">  GET</span>  <span class="r">/register</span>    <span class="a">→</span> <span class="o">guest</span><span class="term-cursor"></span></div>
+        </div>
+
+        <div class="demo-cta">
             <a class="btn" href="{{ route('dashboard') }}">
                 <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
                 Dashboard
             </a>
             @auth
                 <span class="greeting">Salom, {{ auth()->user()->name }}</span>
-                <form action="{{ route('logout') }}" method="POST">@csrf</form>
-                <button type="submit" formaction="{{ route('logout') }}" formmethod="POST" class="btn ghost">
+                <button type="button" class="btn ghost" data-logout aria-haspopup="dialog">
                     <svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
                     Chiqish
                 </button>
@@ -88,5 +123,54 @@
     <footer class="footer">
         &copy; {{ date('Y') }} <a href="https://urinboydev.uz" target="_blank" rel="noopener">UrinboyDev</a> tomonidan yaratilgan<br>Qadamchi PHP Mikrofreymvork
     </footer>
+
+    @auth
+    <form id="logoutForm" action="{{ route('logout') }}" method="POST" class="logout-form">@csrf</form>
+    <div class="modal" id="logoutModal" hidden role="dialog" aria-modal="true" aria-labelledby="logoutTitle" aria-hidden="true">
+        <div class="modal-backdrop" data-modal-close></div>
+        <div class="modal-dialog" role="document">
+            <div class="modal-icon">
+                <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+            </div>
+            <h3 id="logoutTitle">Chiqishni tasdiqlang</h3>
+            <p class="modal-text">Siz rostdan ham tizimdan chiqmoqchimisiz? Shu andan boshlab sessiyangiz tugatiladi va boshqa sahifalarga kirish uchun qayta kirishingiz kerak bo'ladi.</p>
+            <div class="modal-actions">
+                <button type="button" class="btn ghost" data-modal-close>Bekor qilish</button>
+                <button type="submit" form="logoutForm" class="btn danger">
+                    <svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+                    Chiqish
+                </button>
+            </div>
+        </div>
+    </div>
+    <script>
+        (function () {
+            var modal = document.getElementById('logoutModal');
+            if (!modal) return;
+            var lastFocus = null;
+            function open() {
+                lastFocus = document.activeElement;
+                modal.hidden = false;
+                modal.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+                var f = modal.querySelector('button');
+                if (f) f.focus();
+            }
+            function close() {
+                modal.hidden = true;
+                modal.setAttribute('aria-hidden', 'true');
+                document.body.style.overflow = '';
+                if (lastFocus && lastFocus.focus) lastFocus.focus();
+            }
+            document.addEventListener('click', function (e) {
+                if (e.target.closest('[data-logout]')) { e.preventDefault(); open(); return; }
+                if (e.target.closest('[data-modal-close]')) { e.preventDefault(); close(); }
+            });
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && !modal.hidden) close();
+            });
+        })();
+    </script>
+    @endauth
 </body>
 </html>

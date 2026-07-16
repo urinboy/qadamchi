@@ -24,8 +24,7 @@
             @auth
                 <a href="{{ route('dashboard') }}"><svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>Dashboard</a>
                 <span class="greeting">Salom, {{ auth()->user()->name }}</span>
-                <form action="{{ route('logout') }}" method="POST">@csrf</form>
-                <button type="submit" formaction="{{ route('logout') }}" formmethod="POST" class="btn ghost"><svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>Chiqish</button>
+                <button type="button" class="btn ghost" data-logout aria-haspopup="dialog"><svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>Chiqish</button>
             @endauth
             @guest
                 <a href="{{ route('login') }}" class="btn ghost"><svg viewBox="0 0 24 24"><path d="M11 7L9.6 8.4l2.6 2.6H2v2h10.2l-2.6 2.6L11 17l5-5zm9 12h-8v2h8c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-8v2h8v14z"/></svg>Kirish</a>
@@ -65,5 +64,54 @@
             btn.setAttribute('aria-label', show ? 'Parolni yashirish' : 'Parolni ko‘rsatish');
         });
     </script>
+
+    @auth
+    <form id="logoutForm" action="{{ route('logout') }}" method="POST" class="logout-form">@csrf</form>
+    <div class="modal" id="logoutModal" hidden role="dialog" aria-modal="true" aria-labelledby="logoutTitle" aria-hidden="true">
+        <div class="modal-backdrop" data-modal-close></div>
+        <div class="modal-dialog" role="document">
+            <div class="modal-icon">
+                <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+            </div>
+            <h3 id="logoutTitle">Chiqishni tasdiqlang</h3>
+            <p class="modal-text">Siz rostdan ham tizimdan chiqmoqchimisiz? Shu andan boshlab sessiyangiz tugatiladi va boshqa sahifalarga kirish uchun qayta kirishingiz kerak bo'ladi.</p>
+            <div class="modal-actions">
+                <button type="button" class="btn ghost" data-modal-close>Bekor qilish</button>
+                <button type="submit" form="logoutForm" class="btn danger">
+                    <svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+                    Chiqish
+                </button>
+            </div>
+        </div>
+    </div>
+    <script>
+        (function () {
+            var modal = document.getElementById('logoutModal');
+            if (!modal) return;
+            var lastFocus = null;
+            function open() {
+                lastFocus = document.activeElement;
+                modal.hidden = false;
+                modal.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+                var f = modal.querySelector('button');
+                if (f) f.focus();
+            }
+            function close() {
+                modal.hidden = true;
+                modal.setAttribute('aria-hidden', 'true');
+                document.body.style.overflow = '';
+                if (lastFocus && lastFocus.focus) lastFocus.focus();
+            }
+            document.addEventListener('click', function (e) {
+                if (e.target.closest('[data-logout]')) { e.preventDefault(); open(); return; }
+                if (e.target.closest('[data-modal-close]')) { e.preventDefault(); close(); }
+            });
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && !modal.hidden) close();
+            });
+        })();
+    </script>
+    @endauth
 </body>
 </html>
