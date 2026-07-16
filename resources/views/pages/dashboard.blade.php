@@ -97,20 +97,5 @@
             </div>
         </div>
     </section>
-
-    <div class="dash-actions">
-        <a class="btn ghost" href="{{ route('home') }}">
-            <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-            Bosh sahifa
-        </a>
-        <a class="btn ghost" href="{{ route('docs.index') }}">
-            <svg viewBox="0 0 24 24"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/></svg>
-            Hujjatlar
-        </a>
-        <button type="button" class="btn" data-logout>
-            <svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
-            Chiqish
-        </button>
-    </div>
 </div>
 @endsection
