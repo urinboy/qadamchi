@@ -33,6 +33,7 @@ class Session
             if (!isset($_SESSION)) {
                 $_SESSION = [];
             }
+            $this->ageFlash();
             return;
         }
         $cookie = config('session', []);
@@ -46,6 +47,19 @@ class Session
             ]);
         }
         session_start();
+        $this->ageFlash();
+    }
+
+    /**
+     * Flash'ni "eslatadi" (Laravel ageFlash) — har so'rov boshida bir marta.
+     * Oldingi so'rovda yozilgan _flash_new joriy o'qish qatlamiga (_flash) ko'chiriladi,
+     * u erda turgan eskilar esa tashlab yuboriladi. Shunda flash aynan bitta
+     * keyingi so'rovda yashaydi va o'z-o'zidan yo'qolib ketadi — doimiy alert emas.
+     */
+    public function ageFlash(): void
+    {
+        $_SESSION['_flash'] = $_SESSION['_flash_new'] ?? [];
+        unset($_SESSION['_flash_new']);
     }
 
     public function put(string $key, $value): void
@@ -78,29 +92,31 @@ class Session
         $_SESSION = [];
     }
 
-    /** Flash: keyingi so'rovda yashaydi. */
+    /** Flash: keyingi so'rovda yashaydi — yangi qatlamga (_flash_new) yoziladi. */
     public function flash(string $key, $value): void
     {
-        $_SESSION['_flash'][$key] = $value;
+        $_SESSION['_flash_new'][$key] = $value;
     }
 
+    /** Joriy so'rovdagi flash'ni yana bir so'rovga uzaytiradi. */
     public function reflash(): void
     {
         foreach (($_SESSION['_flash'] ?? []) as $k => $v) {
-            $_SESSION['_flash'][$k] = $v;
+            $_SESSION['_flash_new'][$k] = $v;
         }
     }
 
+    /** Faqat ko'rsatilgan kalitlarni yana bir so'rovga uzaytiradi. */
     public function keep(array $keys): void
     {
         foreach ($keys as $k) {
-            if (isset($_SESSION['_flash'][$k])) {
-                // qiymatni saqlab qolamiz (keyingi so'rovda ham yashasin)
-                $_SESSION['_flash'][$k] = $_SESSION['_flash'][$k];
+            if (array_key_exists($k, $_SESSION['_flash'] ?? [])) {
+                $_SESSION['_flash_new'][$k] = $_SESSION['_flash'][$k];
             }
         }
     }
 
+    /** Joriy (aged) flash'dan o'qiydi — bu so'rovda, _flash_new emas. */
     public function getFlash(string $key, $default = null)
     {
         return $_SESSION['_flash'][$key] ?? $default;
@@ -120,7 +136,7 @@ class Session
 
     public function clearFlash(): void
     {
-        unset($_SESSION['_flash']);
+        unset($_SESSION['_flash'], $_SESSION['_flash_new']);
     }
 
     /** Eski statik API bilan moslik. */
